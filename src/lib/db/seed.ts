@@ -586,6 +586,12 @@ async function main() {
       })
       .returning();
 
+    await db.insert(s.orderSubmissions).values({
+      restaurantId: restaurant.id,
+      idempotencyKey: plan.idempotencyKey,
+      orderId: order.id,
+    });
+
     const itemsValues = plan.items.map((it) => {
       const item = menuByKey[it.key as keyof typeof menuByKey];
       return {

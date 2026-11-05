@@ -8,6 +8,13 @@
       "when": 1793898354691,
       "tag": "0000_salty_the_fury",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793903197146,
+      "tag": "0001_overjoyed_stryfe",
+      "breakpoints": true
     }
   ]
 }
