@@ -7,7 +7,6 @@ import { orders } from '@/lib/db/schema';
 import { loadOrderView } from '@/lib/services/order.service';
 import { markServedAction } from '../actions';
 
-export const dynamic = 'force-dynamic';
 
 export default async function OrderDetailPage(props: {
   params: Promise<{ id: string }>;

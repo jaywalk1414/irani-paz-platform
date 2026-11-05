@@ -3,7 +3,6 @@ import { sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {

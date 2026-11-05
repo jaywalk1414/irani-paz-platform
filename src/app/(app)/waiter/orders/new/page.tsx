@@ -9,7 +9,6 @@ import { tables } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { OrderFlow } from './OrderFlow';
 
-export const dynamic = 'force-dynamic';
 
 export default async function NewOrderPage(props: {
   searchParams: Promise<{ tableId?: string }>;
