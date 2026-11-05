@@ -67,3 +67,22 @@ export async function markServedAction(orderId: string) {
   revalidatePath('/waiter/orders');
   revalidatePath('/kitchen/orders');
 }
+
+
+import { previewOrderEstimate, type OrderLineInput } from '@/lib/services/order.service';
+
+export async function previewEstimateAction(
+  tableId: string,
+  items: OrderLineInput[],
+): Promise<{ ok: true; estimatedReadyAt: string } | { ok: false; error: string }> {
+  const user = await requireRole(['waiter']);
+  try {
+    const result = await previewOrderEstimate(
+      { restaurantId: user.restaurantId, branchId: user.branchId!, userId: user.id },
+      { tableId, items },
+    );
+    return { ok: true, estimatedReadyAt: result.estimatedReadyAt.toISOString() };
+  } catch {
+    return { ok: false, error: 'Could not compute estimate.' };
+  }
+}

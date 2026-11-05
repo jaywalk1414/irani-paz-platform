@@ -1,5 +1,5 @@
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
-import { db, type DB } from '@/lib/db/client';
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { db, type DB } from "@/lib/db/client";
 import {
   menuItems,
   orderItems,
@@ -7,14 +7,18 @@ import {
   orderStatusHistory,
   orderSubmissions,
   tables,
-} from '@/lib/db/schema';
-import { reserveQuantity, releaseQuantity, getBusinessContext } from './availability.service';
-import { computeOrderEstimate } from './estimate.service';
-import { OrderError } from './errors';
+} from "@/lib/db/schema";
+import {
+  reserveQuantity,
+  releaseQuantity,
+  getBusinessContext,
+} from "./availability.service";
+import { computeOrderEstimate } from "./estimate.service";
+import { OrderError } from "./errors";
 
-type Tx = Parameters<Parameters<DB['transaction']>[0]>[0];
+type Tx = Parameters<Parameters<DB["transaction"]>[0]>[0];
 
-const ACTIVE_ORDER_STATUSES = ['confirmed', 'preparing'] as const;
+const ACTIVE_ORDER_STATUSES = ["confirmed", "preparing"] as const;
 
 // ---------------------------------------------------------------------------
 // Service context (obtained from requireTenant() at the entry point)
@@ -49,7 +53,7 @@ export interface OrderItemView {
   unitPriceToman: number;
   quantity: number;
   specialInstructions: string | null;
-  status: 'pending' | 'preparing' | 'ready' | 'cancelled';
+  status: "pending" | "preparing" | "ready" | "cancelled";
   prepGroup: string;
   prepTimeMinutes: number;
   startedAt: Date | null;
@@ -60,7 +64,7 @@ export interface OrderView {
   id: string;
   tableId: string;
   tableLabel: string;
-  status: 'confirmed' | 'preparing' | 'ready' | 'served' | 'cancelled';
+  status: "confirmed" | "preparing" | "ready" | "served" | "cancelled";
   items: OrderItemView[];
   totalToman: number;
   estimatedReadyAt: Date | null;
@@ -80,7 +84,10 @@ export interface SubmitOrderResult {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function loadOrderView(tx: Tx | DB, orderId: string): Promise<OrderView | null> {
+export async function loadOrderView(
+  tx: Tx | DB,
+  orderId: string,
+): Promise<OrderView | null> {
   const [order] = await tx
     .select({
       id: orders.id,
@@ -119,7 +126,7 @@ async function loadOrderView(tx: Tx | DB, orderId: string): Promise<OrderView | 
     .orderBy(orderItems.createdAt);
 
   const totalToman = items
-    .filter((i) => i.status !== 'cancelled')
+    .filter((i) => i.status !== "cancelled")
     .reduce((sum, i) => sum + i.unitPriceToman * i.quantity, 0);
 
   return { ...order, items, totalToman };
@@ -170,27 +177,27 @@ async function recomputeOrderStatus(
     .where(eq(orders.id, orderId))
     .limit(1);
   if (!order) return;
-  if (order.status === 'served' || order.status === 'cancelled') return;
+  if (order.status === "served" || order.status === "cancelled") return;
 
   const items = await tx
     .select({ status: orderItems.status })
     .from(orderItems)
     .where(eq(orderItems.orderId, orderId));
 
-  const active = items.filter((i) => i.status !== 'cancelled');
+  const active = items.filter((i) => i.status !== "cancelled");
   if (active.length === 0) {
     await tx
       .update(orders)
-      .set({ status: 'cancelled', cancelledAt: now, updatedAt: now })
+      .set({ status: "cancelled", cancelledAt: now, updatedAt: now })
       .where(eq(orders.id, orderId));
     return;
   }
 
-  const nextStatus = active.every((i) => i.status === 'ready')
-    ? 'ready'
-    : active.some((i) => i.status === 'preparing' || i.status === 'ready')
-      ? 'preparing'
-      : 'confirmed';
+  const nextStatus = active.every((i) => i.status === "ready")
+    ? "ready"
+    : active.some((i) => i.status === "preparing" || i.status === "ready")
+      ? "preparing"
+      : "confirmed";
 
   if (nextStatus === order.status) return;
 
@@ -198,7 +205,7 @@ async function recomputeOrderStatus(
     .update(orders)
     .set({
       status: nextStatus,
-      readyAt: nextStatus === 'ready' ? now : null,
+      readyAt: nextStatus === "ready" ? now : null,
       updatedAt: now,
     })
     .where(eq(orders.id, orderId));
@@ -207,8 +214,8 @@ async function recomputeOrderStatus(
 async function recordStatusChange(
   tx: Tx,
   orderId: string,
-  from: OrderView['status'] | null,
-  to: OrderView['status'],
+  from: OrderView["status"] | null,
+  to: OrderView["status"],
   userId: string,
   at: Date,
 ): Promise<void> {
@@ -241,11 +248,14 @@ export async function submitOrder(
   input: SubmitOrderInput,
 ): Promise<SubmitOrderResult> {
   if (input.items.length === 0) {
-    throw new OrderError('EMPTY_ORDER', 'Order must contain at least one item.');
+    throw new OrderError(
+      "EMPTY_ORDER",
+      "Order must contain at least one item.",
+    );
   }
   for (const line of input.items) {
     if (line.quantity <= 0) {
-      throw new OrderError('INVALID_QUANTITY', 'Quantity must be positive.');
+      throw new OrderError("INVALID_QUANTITY", "Quantity must be positive.");
     }
   }
 
@@ -267,7 +277,7 @@ export async function submitOrder(
 
     if (existing) {
       const view = await loadOrderView(tx, existing.orderId);
-      if (!view) throw new OrderError('ORDER_NOT_FOUND');
+      if (!view) throw new OrderError("ORDER_NOT_FOUND");
       return { order: view, wasIdempotentReplay: true, wasAppend: false };
     }
 
@@ -282,7 +292,7 @@ export async function submitOrder(
         ),
       )
       .limit(1);
-    if (!table) throw new OrderError('TABLE_NOT_FOUND');
+    if (!table) throw new OrderError("TABLE_NOT_FOUND");
 
     // 3. Find active order for table, or create a new one
     const [active] = await tx
@@ -312,7 +322,7 @@ export async function submitOrder(
           branchId: ctx.branchId,
           tableId: input.tableId,
           createdByUserId: ctx.userId,
-          status: 'confirmed',
+          status: "confirmed",
           idempotencyKey: input.idempotencyKey,
           confirmedAt: now,
         })
@@ -321,10 +331,10 @@ export async function submitOrder(
 
       await tx
         .update(tables)
-        .set({ status: 'occupied' })
+        .set({ status: "occupied" })
         .where(eq(tables.id, input.tableId));
 
-      await recordStatusChange(tx, orderId, null, 'confirmed', ctx.userId, now);
+      await recordStatusChange(tx, orderId, null, "confirmed", ctx.userId, now);
     }
 
     // 4. Reserve, snapshot, insert each line
@@ -342,7 +352,10 @@ export async function submitOrder(
         .limit(1);
 
       if (!item) {
-        throw new OrderError('MENU_ITEM_NOT_FOUND', `Item ${line.menuItemId} is unavailable.`);
+        throw new OrderError(
+          "MENU_ITEM_NOT_FOUND",
+          `Item ${line.menuItemId} is unavailable.`,
+        );
       }
 
       // Atomic reservation — throws InsufficientAvailabilityError if unavailable.
@@ -365,7 +378,7 @@ export async function submitOrder(
         prepGroupSnapshot: item.prepGroup,
         quantity: line.quantity,
         specialInstructions: line.specialInstructions ?? null,
-        status: 'pending',
+        status: "pending",
       });
     }
 
@@ -381,7 +394,7 @@ export async function submitOrder(
     });
 
     const view = await loadOrderView(tx, orderId);
-    if (!view) throw new OrderError('ORDER_NOT_FOUND');
+    if (!view) throw new OrderError("ORDER_NOT_FOUND");
 
     return { order: view, wasIdempotentReplay: false, wasAppend };
   });
@@ -397,7 +410,11 @@ export async function markItemPreparing(
 ): Promise<OrderView> {
   return db.transaction(async (tx) => {
     const [item] = await tx
-      .select({ id: orderItems.id, orderId: orderItems.orderId, status: orderItems.status })
+      .select({
+        id: orderItems.id,
+        orderId: orderItems.orderId,
+        status: orderItems.status,
+      })
       .from(orderItems)
       .innerJoin(orders, eq(orders.id, orderItems.orderId))
       .where(
@@ -407,22 +424,25 @@ export async function markItemPreparing(
         ),
       )
       .limit(1);
-    if (!item) throw new OrderError('ORDER_ITEM_NOT_FOUND');
-    if (item.status !== 'pending') {
-      throw new OrderError('INVALID_TRANSITION', `Cannot start a ${item.status} item.`);
+    if (!item) throw new OrderError("ORDER_ITEM_NOT_FOUND");
+    if (item.status !== "pending") {
+      throw new OrderError(
+        "INVALID_TRANSITION",
+        `Cannot start a ${item.status} item.`,
+      );
     }
 
     const now = new Date();
     await tx
       .update(orderItems)
-      .set({ status: 'preparing', startedAt: now })
+      .set({ status: "preparing", startedAt: now })
       .where(eq(orderItems.id, orderItemId));
 
     await recomputeOrderStatus(tx, item.orderId, now);
     await recomputeOrderEstimate(tx, item.orderId, now);
 
     const view = await loadOrderView(tx, item.orderId);
-    if (!view) throw new OrderError('ORDER_NOT_FOUND');
+    if (!view) throw new OrderError("ORDER_NOT_FOUND");
     return view;
   });
 }
@@ -433,7 +453,11 @@ export async function markItemReady(
 ): Promise<OrderView> {
   return db.transaction(async (tx) => {
     const [item] = await tx
-      .select({ id: orderItems.id, orderId: orderItems.orderId, status: orderItems.status })
+      .select({
+        id: orderItems.id,
+        orderId: orderItems.orderId,
+        status: orderItems.status,
+      })
       .from(orderItems)
       .innerJoin(orders, eq(orders.id, orderItems.orderId))
       .where(
@@ -443,16 +467,19 @@ export async function markItemReady(
         ),
       )
       .limit(1);
-    if (!item) throw new OrderError('ORDER_ITEM_NOT_FOUND');
-    if (item.status !== 'preparing' && item.status !== 'pending') {
-      throw new OrderError('INVALID_TRANSITION', `Cannot mark a ${item.status} item ready.`);
+    if (!item) throw new OrderError("ORDER_ITEM_NOT_FOUND");
+    if (item.status !== "preparing" && item.status !== "pending") {
+      throw new OrderError(
+        "INVALID_TRANSITION",
+        `Cannot mark a ${item.status} item ready.`,
+      );
     }
 
     const now = new Date();
     await tx
       .update(orderItems)
       .set({
-        status: 'ready',
+        status: "ready",
         startedAt: sql`COALESCE(${orderItems.startedAt}, ${now})`,
         readyAt: now,
       })
@@ -462,7 +489,7 @@ export async function markItemReady(
     await recomputeOrderEstimate(tx, item.orderId, now);
 
     const view = await loadOrderView(tx, item.orderId);
-    if (!view) throw new OrderError('ORDER_NOT_FOUND');
+    if (!view) throw new OrderError("ORDER_NOT_FOUND");
     return view;
   });
 }
@@ -492,19 +519,22 @@ export async function cancelItem(
         ),
       )
       .limit(1);
-    if (!item) throw new OrderError('ORDER_ITEM_NOT_FOUND');
-    if (item.status === 'ready' || item.status === 'cancelled') {
-      throw new OrderError('INVALID_TRANSITION', `Cannot cancel a ${item.status} item.`);
+    if (!item) throw new OrderError("ORDER_ITEM_NOT_FOUND");
+    if (item.status === "ready" || item.status === "cancelled") {
+      throw new OrderError(
+        "INVALID_TRANSITION",
+        `Cannot cancel a ${item.status} item.`,
+      );
     }
 
     const now = new Date();
     await tx
       .update(orderItems)
       .set({
-        status: 'cancelled',
+        status: "cancelled",
         cancelledAt: now,
         specialInstructions: reason
-          ? sql`COALESCE(${orderItems.specialInstructions} || E'\n', '') || ${'[cancelled] ' + reason}`
+          ? sql`COALESCE(${orderItems.specialInstructions} || E'\n', '') || ${"[cancelled] " + reason}`
           : orderItems.specialInstructions,
       })
       .where(eq(orderItems.id, orderItemId));
@@ -521,7 +551,7 @@ export async function cancelItem(
     await recomputeOrderEstimate(tx, item.orderId, now);
 
     const view = await loadOrderView(tx, item.orderId);
-    if (!view) throw new OrderError('ORDER_NOT_FOUND');
+    if (!view) throw new OrderError("ORDER_NOT_FOUND");
     return view;
   });
 }
@@ -542,10 +572,10 @@ export async function markOrderServed(
         and(eq(orders.id, orderId), eq(orders.restaurantId, ctx.restaurantId)),
       )
       .limit(1);
-    if (!order) throw new OrderError('ORDER_NOT_FOUND');
-    if (order.status !== 'ready') {
+    if (!order) throw new OrderError("ORDER_NOT_FOUND");
+    if (order.status !== "ready") {
       throw new OrderError(
-        'INVALID_TRANSITION',
+        "INVALID_TRANSITION",
         `Order must be ready before served (currently ${order.status}).`,
       );
     }
@@ -553,18 +583,25 @@ export async function markOrderServed(
     const now = new Date();
     await tx
       .update(orders)
-      .set({ status: 'served', servedAt: now, updatedAt: now })
+      .set({ status: "served", servedAt: now, updatedAt: now })
       .where(eq(orders.id, orderId));
 
-    await recordStatusChange(tx, orderId, order.status, 'served', ctx.userId, now);
+    await recordStatusChange(
+      tx,
+      orderId,
+      order.status,
+      "served",
+      ctx.userId,
+      now,
+    );
 
     await tx
       .update(tables)
-      .set({ status: 'available' })
+      .set({ status: "available" })
       .where(eq(tables.id, order.tableId));
 
     const view = await loadOrderView(tx, orderId);
-    if (!view) throw new OrderError('ORDER_NOT_FOUND');
+    if (!view) throw new OrderError("ORDER_NOT_FOUND");
     return view;
   });
 }
@@ -584,7 +621,7 @@ export async function getActiveOrderForTable(
       and(
         eq(orders.restaurantId, restaurantId),
         eq(orders.tableId, tableId),
-        inArray(orders.status, [...ACTIVE_ORDER_STATUSES, 'ready']),
+        inArray(orders.status, [...ACTIVE_ORDER_STATUSES, "ready"]),
       ),
     )
     .orderBy(desc(orders.createdAt))
@@ -603,7 +640,7 @@ export async function listKitchenOrders(
       and(
         eq(orders.restaurantId, restaurantId),
         eq(orders.branchId, branchId),
-        inArray(orders.status, ['confirmed', 'preparing']),
+        inArray(orders.status, ["confirmed", "preparing"]),
       ),
     )
     .orderBy(orders.confirmedAt);
@@ -611,4 +648,72 @@ export async function listKitchenOrders(
   return (await Promise.all(rows.map((r) => loadOrderView(db, r.id)))).filter(
     (v): v is OrderView => v !== null,
   );
+}
+
+import { type EstimateLine } from "./estimate.service";
+
+export interface PreviewOrderInput {
+  tableId: string;
+  items: OrderLineInput[];
+}
+
+export interface PreviewOrderResult {
+  estimatedReadyAt: Date;
+  isAppend: boolean;
+}
+
+/**
+ * Compute what the order's ready time would be if `items` were added now.
+ * Combines the table's active-order progress with the tentative lines.
+ * Non-mutating — no reservations are made.
+ */
+export async function previewOrderEstimate(
+  ctx: ServiceContext,
+  input: PreviewOrderInput,
+): Promise<PreviewOrderResult> {
+  const existing = await getActiveOrderForTable(
+    ctx.restaurantId,
+    input.tableId,
+  );
+
+  const existingLines: EstimateLine[] = (existing?.items ?? []).map((i) => ({
+    prepGroup: i.prepGroup,
+    prepTimeMinutes: i.prepTimeMinutes,
+    status: i.status,
+    startedAt: i.startedAt,
+  }));
+
+  const ids = input.items.map((i) => i.menuItemId);
+  const menuRows =
+    ids.length === 0
+      ? []
+      : await db
+          .select()
+          .from(menuItems)
+          .where(
+            and(
+              eq(menuItems.restaurantId, ctx.restaurantId),
+              inArray(menuItems.id, ids),
+            ),
+          );
+  const menuById = new Map(menuRows.map((m) => [m.id, m]));
+
+  const newLines: EstimateLine[] = input.items.flatMap((line) => {
+    const item = menuById.get(line.menuItemId);
+    if (!item) return [];
+    return [
+      {
+        prepGroup: item.prepGroup,
+        prepTimeMinutes: item.prepTimeMinutes,
+        status: "pending" as const,
+        startedAt: null,
+      },
+    ];
+  });
+
+  const estimate = computeOrderEstimate(
+    [...existingLines, ...newLines],
+    new Date(),
+  );
+  return { estimatedReadyAt: estimate, isAppend: !!existing };
 }
