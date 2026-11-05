@@ -717,3 +717,67 @@ export async function previewOrderEstimate(
   );
   return { estimatedReadyAt: estimate, isAppend: !!existing };
 }
+
+export async function listKitchenOrdersEfficient(
+  restaurantId: string,
+  branchId: string,
+): Promise<OrderView[]> {
+  const orderRows = await db
+    .select({
+      id: orders.id,
+      tableId: orders.tableId,
+      tableLabel: tables.label,
+      status: orders.status,
+      estimatedReadyAt: orders.estimatedReadyAt,
+      confirmedAt: orders.confirmedAt,
+      readyAt: orders.readyAt,
+      servedAt: orders.servedAt,
+      cancelledAt: orders.cancelledAt,
+    })
+    .from(orders)
+    .innerJoin(tables, eq(tables.id, orders.tableId))
+    .where(
+      and(
+        eq(orders.restaurantId, restaurantId),
+        eq(orders.branchId, branchId),
+        inArray(orders.status, ['confirmed', 'preparing']),
+      ),
+    )
+    .orderBy(orders.confirmedAt);
+
+  if (orderRows.length === 0) return [];
+
+  const itemRows = await db
+    .select({
+      id: orderItems.id,
+      orderId: orderItems.orderId,
+      menuItemId: orderItems.menuItemId,
+      name: orderItems.nameSnapshot,
+      unitPriceToman: orderItems.unitPriceTomanSnapshot,
+      quantity: orderItems.quantity,
+      specialInstructions: orderItems.specialInstructions,
+      status: orderItems.status,
+      prepGroup: orderItems.prepGroupSnapshot,
+      prepTimeMinutes: orderItems.prepTimeMinutesSnapshot,
+      startedAt: orderItems.startedAt,
+      readyAt: orderItems.readyAt,
+    })
+    .from(orderItems)
+    .where(inArray(orderItems.orderId, orderRows.map((o) => o.id)))
+    .orderBy(orderItems.createdAt);
+
+  const itemsByOrder = new Map<string, typeof itemRows>();
+  for (const item of itemRows) {
+    const arr = itemsByOrder.get(item.orderId) ?? [];
+    arr.push(item);
+    itemsByOrder.set(item.orderId, arr);
+  }
+
+  return orderRows.map((o) => {
+    const items = itemsByOrder.get(o.id) ?? [];
+    const totalToman = items
+      .filter((i) => i.status !== 'cancelled')
+      .reduce((s, i) => s + i.unitPriceToman * i.quantity, 0);
+    return { ...o, items, totalToman };
+  });
+}

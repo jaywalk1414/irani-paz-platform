@@ -14,28 +14,31 @@ import {
 
 const adjustSchema = z.object({
   menuItemId: z.string().uuid(),
-  deltaConfigured: z.number().int().refine((v) => v !== 0, {
-    message: 'Adjustment cannot be zero.',
-  }),
+  deltaConfigured: z.coerce
+    .number()
+    .int()
+    .refine((v) => v !== 0, { message: 'Adjustment cannot be zero.' }),
   reason: z.string().max(500).optional(),
 });
 
-export type AdjustActionResult =
+export type AdjustAvailabilityState =
   | { ok: true; availableQuantity: number; configuredQuantity: number }
-  | { ok: false; error: string; code?: string };
+  | { ok: false; error: string; code?: string }
+  | null;
 
 export async function adjustAvailabilityAction(
+  _prev: AdjustAvailabilityState,
   formData: FormData,
-): Promise<AdjustActionResult> {
+): Promise<AdjustAvailabilityState> {
   const user = await requireRole(['owner']);
 
   const parsed = adjustSchema.safeParse({
     menuItemId: formData.get('menuItemId'),
-    deltaConfigured: Number(formData.get('deltaConfigured')),
-    reason: formData.get('reason') || undefined,
+    deltaConfigured: formData.get('deltaConfigured'),
+    reason: (formData.get('reason') as string) || undefined,
   });
   if (!parsed.success) {
-    return { ok: false, error: 'Invalid adjustment.' };
+    return { ok: false, error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
   }
 
   const ctx = await getBusinessContext(user.restaurantId);
@@ -50,14 +53,15 @@ export async function adjustAvailabilityAction(
       adjustedByUserId: user.id,
     });
 
-    revalidatePath('/owner/menu/availability');
+    revalidatePath('/owner/availability');
+    revalidatePath('/owner/dashboard');
     revalidatePath('/waiter/dashboard');
     revalidatePath('/kitchen/orders');
 
     return {
       ok: true,
-      configuredQuantity: result.configuredQuantity,
       availableQuantity: result.availableQuantity,
+      configuredQuantity: result.configuredQuantity,
     };
   } catch (err) {
     if (err instanceof ConfiguredBelowReservedError) {
