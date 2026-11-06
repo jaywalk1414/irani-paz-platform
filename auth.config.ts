@@ -1,12 +1,12 @@
-import type { NextAuthConfig } from 'next-auth';
+import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
   trustHost: true,
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -22,10 +22,11 @@ export const authConfig = {
         session.user.id = token.sub!;
         session.user.restaurantId = token.restaurantId as string;
         session.user.branchId = (token.branchId ?? null) as string | null;
-        session.user.role = token.role as 'owner' | 'waiter' | 'kitchen';
+        session.user.role = token.role as "owner" | "waiter" | "kitchen";
       }
       return session;
     },
   },
+  secret: process.env.AUTH_SECRET,
   providers: [],
 } satisfies NextAuthConfig;

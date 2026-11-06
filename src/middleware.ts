@@ -1,36 +1,35 @@
-import NextAuth from 'next-auth';
-import { authConfig } from '../auth.config';
-import { NextResponse } from 'next/server';
-import type { NextFetchEvent, NextRequest } from 'next/server';
+import NextAuth from "next-auth";
+import { authConfig } from "../auth.config";
+import { NextResponse } from "next/server";
+import type { NextFetchEvent, NextRequest } from "next/server";
 
-const { auth } = NextAuth(() => ({
-  ...authConfig,
-  secret: process.env.AUTH_SECRET,
-  trustHost: true,
-}));
+const { auth } = NextAuth(authConfig);
 
 const authMiddleware = auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
-  const isAuthRoute = nextUrl.pathname.startsWith('/api/auth');
+  const isAuthRoute = nextUrl.pathname.startsWith("/api/auth");
   const isPublic =
-    nextUrl.pathname === '/login' ||
-    nextUrl.pathname.startsWith('/_next') ||
-    nextUrl.pathname === '/favicon.ico';
+    nextUrl.pathname === "/login" ||
+    nextUrl.pathname.startsWith("/_next") ||
+    nextUrl.pathname === "/favicon.ico";
 
   if (isAuthRoute || isPublic) return NextResponse.next();
 
   if (!isLoggedIn) {
-    const login = new URL('/login', nextUrl);
-    login.searchParams.set('callbackUrl', nextUrl.pathname);
+    const login = new URL("/login", nextUrl);
+    login.searchParams.set("callbackUrl", nextUrl.pathname);
     return NextResponse.redirect(login);
   }
 
   return NextResponse.next();
 });
 
-export default async function middleware(req: NextRequest, event: NextFetchEvent) {
+export default async function middleware(
+  req: NextRequest,
+  event: NextFetchEvent,
+) {
   const handler = (await authMiddleware) as unknown as (
     req: NextRequest,
     event: NextFetchEvent,
@@ -39,5 +38,7 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|svg)$).*)'],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|svg)$).*)",
+  ],
 };
