@@ -2,7 +2,10 @@ import NextAuth from 'next-auth';
 import { authConfig } from '../auth.config';
 import { NextResponse } from 'next/server';
 
-const { auth } = NextAuth(authConfig);
+const { auth } = NextAuth({
+  ...authConfig,
+  secret: process.env.AUTH_SECRET,
+});
 
 export default auth((req) => {
   const { nextUrl } = req;
