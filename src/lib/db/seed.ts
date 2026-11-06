@@ -1,8 +1,14 @@
 import "./load-env";
 import bcrypt from "bcryptjs";
 import { sql } from "drizzle-orm";
-import { db, pool } from "./client";
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import ws from "ws";
 import * as s from "./schema";
+// Seed runs in plain Node (not on Workers), so the WebSocket Pool is fine here.
+neonConfig.webSocketConstructor = ws;
+const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+const db = drizzle(pool, { schema: s });
 
 // ---------- helpers ----------
 
