@@ -8,6 +8,11 @@ const { auth } = NextAuth({
 });
 
 export default auth((req) => {
+    console.log(
+    '[AUTH DEBUG] AUTH_SECRET available:',
+    Boolean(process.env.AUTH_SECRET)
+  );
+  
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
