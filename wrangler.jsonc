@@ -11,13 +11,6 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "vars": {
-    "AUTH_SECRET": "v4FN6aLIGtH599B6Wd07Fg+oraGC8QL5a+DnJu8lIvo=",
-    "DATABASE_URL": "postgresql://neondb_owner:npg_uLUphX1G6fdw@ep-rough-meadow-b9wwzdlj-pooler.c-7.eu-central-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
-    "DATABASE_URL_DIRECT": "postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require",
-    "DATABASE_URL_UNPOOLED": "postgresql://neondb_owner:npg_uLUphX1G6fdw@ep-rough-meadow-b9wwzdlj.c-7.eu-central-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
-    "NEON_BRANCH": "production"
-  },
   "observability": {
     "enabled": true
   }
