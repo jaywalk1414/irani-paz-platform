@@ -3,6 +3,12 @@ import { authConfig } from "../auth.config";
 import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
 
+console.log("[AUTH DEBUG]", {
+  hasAuthSecret: Boolean(process.env.AUTH_SECRET),
+  hasNextAuthSecret: Boolean(process.env.NEXTAUTH_SECRET),
+  nodeEnv: process.env.NODE_ENV,
+});
+
 const { auth } = NextAuth(authConfig);
 
 const authMiddleware = auth((req) => {
