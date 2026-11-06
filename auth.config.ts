@@ -1,6 +1,7 @@
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
+  trustHost: true,
   pages: {
     signIn: '/login',
   },
@@ -26,6 +27,5 @@ export const authConfig = {
       return session;
     },
   },
-  secret: process.env.AUTH_SECRET,
   providers: [],
 } satisfies NextAuthConfig;

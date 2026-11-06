@@ -2,18 +2,13 @@ import NextAuth from 'next-auth';
 import { authConfig } from '../auth.config';
 import { NextResponse } from 'next/server';
 
-const { auth } = NextAuth({
+const { auth } = NextAuth(() => ({
   ...authConfig,
   secret: process.env.AUTH_SECRET,
-});
+  trustHost: true,
+}));
 
 export default auth((req) => {
-console.error('[AUTH DIAGNOSTIC]', {
-  authSecretExists: Boolean(process.env.AUTH_SECRET),
-  authSecretLength: process.env.AUTH_SECRET?.length ?? 0,
-  nodeEnv: process.env.NODE_ENV,
-});
-
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
