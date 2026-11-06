@@ -1,12 +1,17 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from 'ws';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from './schema';
 
-// Required for Node.js runtimes. Vercel's Node.js runtime works with ws.
-neonConfig.webSocketConstructor = ws;
+function createDb() {
+  return drizzle(neon(process.env.DATABASE_URL!), { schema });
+}
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+export type DB = ReturnType<typeof createDb>;
 
-export const db = drizzle(pool, { schema });
-export type DB = typeof db;
+export const db = new Proxy({} as DB, {
+  get(_target, prop) {
+    const client = createDb();
+    const value: unknown = Reflect.get(client, prop);
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+});
