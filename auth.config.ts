@@ -26,6 +26,6 @@ export const authConfig = {
       return session;
     },
   },
-  secret: "SbjIa9Zp0K+WKrWciu03ZAwA+hKu47lIFoPbO4oL9dA=",
-  providers: [], // filled in auth.ts (Node-only providers)
+  secret: process.env.AUTH_SECRET,
+  providers: [],
 } satisfies NextAuthConfig;
