@@ -5,7 +5,6 @@ import { menuItems } from '@/lib/db/schema';
 import { getBusinessContext, listMenuWithAvailability } from '@/lib/services/availability.service';
 import { MenuTable, type MenuRow } from './MenuTable';
 
-export const dynamic = 'force-dynamic';
 
 export default async function OwnerMenuPage() {
   const user = await requireRole(['owner']);

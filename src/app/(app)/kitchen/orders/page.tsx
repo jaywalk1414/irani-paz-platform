@@ -2,7 +2,6 @@ import { requireRole } from '@/lib/auth/require';
 import { listKitchenOrdersEfficient } from '@/lib/services/order.service';
 import { KitchenBoard, type KitchenOrderPayload } from './KitchenBoard';
 
-export const dynamic = 'force-dynamic';
 
 export default async function KitchenOrdersPage() {
   const user = await requireRole(['kitchen', 'owner']);

@@ -13,7 +13,6 @@ import {
 } from '@/lib/services/availability.service';
 import { AvailabilityBoard } from './AvailabilityBoard';
 
-export const dynamic = 'force-dynamic';
 
 export default async function OwnerAvailabilityPage() {
   const user = await requireRole(['owner']);
