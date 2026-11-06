@@ -3,5 +3,5 @@
 import { redirect } from 'next/navigation';
 
 export async function logout() {
-  redirect('/api/auth/logout');
+  redirect('/api/logout');
 }
