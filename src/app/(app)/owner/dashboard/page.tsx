@@ -12,6 +12,18 @@ import { DailySummaryCard } from './DailySummaryCard';
 
 export const dynamic = 'force-dynamic';
 
+const fa = (n: number) => n.toLocaleString('fa-IR');
+const toFaDigits = (s: string) => s.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+
+function formatBusinessDate(d: string) {
+  const date = new Date(`${d}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return toFaDigits(d);
+  return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    dateStyle: 'long',
+    timeZone: 'UTC',
+  }).format(date);
+}
+
 export default async function OwnerDashboardPage() {
   const user = await requireRole(['owner']);
   const ctx = await getBusinessContext(user.restaurantId);
@@ -30,131 +42,124 @@ export default async function OwnerDashboardPage() {
   const totalAvailable = menu.reduce((s, m) => s + m.availableQuantity, 0);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4">
-      <div>
-        <h1 className="text-xl font-semibold">Today at a glance</h1>
-        <p className="text-sm text-zinc-500">
-          Business day {ctx.businessDate} · cutoff {String(ctx.cutoffHour).padStart(2, '0')}:00 Tehran
+    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
+      <div className="space-y-1">
+        <h1 className="text-xl font-bold text-[#252B28]">امروز در یک نگاه</h1>
+        <p className="text-sm leading-7 text-[#737B75]">
+          روز کاری {formatBusinessDate(ctx.businessDate)} ـ پایان روز کاری ساعت{' '}
+          {Number(ctx.cutoffHour).toLocaleString('fa-IR', { minimumIntegerDigits: 2 })}:۰۰ به وقت تهران
         </p>
       </div>
 
-      {/* KPIs */}
+      {/* شاخص‌ها */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KPI label="Orders" value={stats.orderCount.toString()} />
-        <KPI
-          label="Revenue"
-          value={`${stats.revenueToman.toLocaleString('fa-IR')}`}
-          suffix="toman"
-        />
-        <KPI label="Portions sold" value={stats.itemCount.toString()} />
-        <KPI
-          label="Available now"
-          value={totalAvailable.toString()}
-          suffix="portions"
-        />
+        <KPI label="سفارش‌ها" value={fa(stats.orderCount)} />
+        <KPI label="درآمد" value={fa(stats.revenueToman)} suffix="تومان" />
+        <KPI label="پرس‌های فروخته‌شده" value={fa(stats.itemCount)} />
+        <KPI label="موجودی فعلی" value={fa(totalAvailable)} suffix="پرس" />
       </div>
 
-      {/* AI summary */}
+      {/* خلاصه هوش مصنوعی */}
       <DailySummaryCard
         initialSummary={cachedSummary}
         businessDate={ctx.businessDate}
       />
 
-      {/* Top items + busy + adjustments + stock alerts */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Section title="Top sellers today">
+        <Section title="پرفروش‌ترین‌های امروز">
           {stats.topItems.length === 0 ? (
-            <Empty>No orders yet.</Empty>
+            <Empty>هنوز سفارشی ثبت نشده است.</Empty>
           ) : (
             <ol className="space-y-1.5">
               {stats.topItems.map((it, i) => (
                 <li
                   key={it.name}
-                  className="flex items-center justify-between rounded px-2 py-1.5 text-sm odd:bg-zinc-50"
+                  className="flex items-center justify-between rounded-lg px-2.5 py-2 text-sm text-[#252B28] odd:bg-[#F8F9F6]"
                 >
                   <span>
-                    <span className="mr-2 inline-block w-4 text-xs text-zinc-400">
-                      {i + 1}.
+                    <span className="me-2 inline-block w-5 text-xs text-[#737B75]">
+                      {fa(i + 1)}.
                     </span>
                     {it.name}
                   </span>
-                  <span className="font-medium tabular-nums">{it.qty}</span>
+                  <span className="font-semibold tabular-nums">{fa(it.qty)}</span>
                 </li>
               ))}
             </ol>
           )}
         </Section>
 
-        <Section title="Busiest windows">
+        <Section title="شلوغ‌ترین بازه‌ها">
           {stats.busyRanges.length === 0 ? (
-            <Empty>No data yet.</Empty>
+            <Empty>هنوز داده‌ای وجود ندارد.</Empty>
           ) : (
             <ul className="space-y-1.5">
               {stats.busyRanges.map((b) => (
                 <li
                   key={b.range}
-                  className="flex items-center justify-between rounded px-2 py-1.5 text-sm odd:bg-zinc-50"
+                  className="flex items-center justify-between rounded-lg px-2.5 py-2 text-sm text-[#252B28] odd:bg-[#F8F9F6]"
                 >
-                  <span className="tabular-nums">{b.range}</span>
-                  <span className="text-zinc-500">
-                    {b.orders} order{b.orders === 1 ? '' : 's'}
+                  <span dir="ltr" className="tabular-nums">
+                    {toFaDigits(b.range)}
                   </span>
+                  <span className="text-[#737B75]">{fa(b.orders)} سفارش</span>
                 </li>
               ))}
             </ul>
           )}
         </Section>
 
-        <Section title="Stock alerts">
+        <Section title="هشدارهای موجودی">
           {soldOut.length === 0 && lowStock.length === 0 ? (
-            <Empty>All items in stock.</Empty>
+            <Empty>موجودی همه اقلام کافی است.</Empty>
           ) : (
-            <ul className="space-y-1 text-sm">
+            <ul className="space-y-1.5 text-sm">
               {soldOut.map((m) => (
                 <li
                   key={m.menuItemId}
-                  className="flex justify-between rounded bg-rose-50 px-2 py-1.5 text-rose-800"
+                  className="flex justify-between rounded-lg border-s-4 border-[#D9534F] bg-[#D9534F]/10 px-2.5 py-2 text-[#252B28]"
                 >
                   <span>{m.name}</span>
-                  <span className="font-medium">Sold out</span>
+                  <span className="font-semibold text-[#D9534F]">ناموجود</span>
                 </li>
               ))}
               {lowStock.map((m) => (
                 <li
                   key={m.menuItemId}
-                  className="flex justify-between rounded bg-amber-50 px-2 py-1.5 text-amber-800"
+                  className="flex justify-between rounded-lg border-s-4 border-[#D99A32] bg-[#D99A32]/10 px-2.5 py-2 text-[#252B28]"
                 >
                   <span>{m.name}</span>
-                  <span className="font-medium">{m.availableQuantity} left</span>
+                  <span className="font-semibold">{fa(m.availableQuantity)} پرس مانده</span>
                 </li>
               ))}
             </ul>
           )}
         </Section>
 
-        <Section title="Recent adjustments">
+        <Section title="تغییرات اخیر">
           {adjustments.length === 0 ? (
-            <Empty>No adjustments yet today.</Empty>
+            <Empty>امروز هنوز تعدیلی ثبت نشده است.</Empty>
           ) : (
-            <ul className="space-y-1 text-sm">
+            <ul className="space-y-1.5 text-sm">
               {adjustments.map((a) => (
                 <li
                   key={a.id}
-                  className="flex items-center justify-between rounded px-2 py-1.5 odd:bg-zinc-50"
+                  className="flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-[#252B28] odd:bg-[#F8F9F6]"
                 >
                   <span className="truncate">
                     {a.menuItemName}
                     {a.reason && (
-                      <span className="ml-1 text-xs text-zinc-500">— {a.reason}</span>
+                      <span className="ms-1 text-xs text-[#737B75]">ـ {a.reason}</span>
                     )}
                   </span>
                   <span
-                    className={`font-medium tabular-nums ${
-                      a.deltaConfigured > 0 ? 'text-emerald-700' : 'text-rose-700'
+                    dir="ltr"
+                    className={`shrink-0 font-semibold tabular-nums ${
+                      a.deltaConfigured > 0 ? 'text-[#27845A]' : 'text-[#D9534F]'
                     }`}
                   >
-                    {a.deltaConfigured > 0 ? '+' : ''}
-                    {a.deltaConfigured}
+                    {a.deltaConfigured > 0 ? '+' : a.deltaConfigured < 0 ? '−' : ''}
+                    {fa(Math.abs(a.deltaConfigured))}
                   </span>
                 </li>
               ))}
@@ -176,11 +181,13 @@ function KPI({
   suffix?: string;
 }) {
   return (
-    <div className="rounded-lg border bg-white p-3 shadow-sm">
-      <div className="text-xs uppercase tracking-wide text-zinc-500">{label}</div>
-      <div className="mt-1 text-xl font-semibold tabular-nums">
+    <div className="rounded-xl border border-[#E5E9E5] bg-white p-4 shadow-sm">
+      <div className="text-xs text-[#737B75]">{label}</div>
+      <div className="mt-1.5 text-xl font-bold tabular-nums text-[#252B28]">
         {value}
-        {suffix && <span className="ml-1 text-xs font-normal text-zinc-500">{suffix}</span>}
+        {suffix && (
+          <span className="ms-1.5 text-xs font-normal text-[#737B75]">{suffix}</span>
+        )}
       </div>
     </div>
   );
@@ -188,13 +195,13 @@ function KPI({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border bg-white p-4 shadow-sm">
-      <h2 className="mb-2 text-sm font-semibold text-zinc-700">{title}</h2>
+    <section className="rounded-xl border border-[#E5E9E5] bg-white p-4 shadow-sm">
+      <h2 className="mb-3 text-sm font-semibold text-[#252B28]">{title}</h2>
       {children}
     </section>
   );
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <div className="py-4 text-center text-sm text-zinc-400">{children}</div>;
+  return <div className="py-6 text-center text-sm text-[#737B75]">{children}</div>;
 }

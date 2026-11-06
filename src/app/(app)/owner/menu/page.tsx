@@ -5,7 +5,6 @@ import { menuItems } from '@/lib/db/schema';
 import { getBusinessContext, listMenuWithAvailability } from '@/lib/services/availability.service';
 import { MenuTable, type MenuRow } from './MenuTable';
 
-
 export default async function OwnerMenuPage() {
   const user = await requireRole(['owner']);
   const ctx = await getBusinessContext(user.restaurantId);
@@ -39,13 +38,13 @@ export default async function OwnerMenuPage() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl space-y-4 p-4">
-      <div>
-        <h1 className="text-xl font-semibold">Menu</h1>
-        <p className="text-sm text-zinc-500">
-          Edit prices, prep times, ingredients, and default daily quantities.
-          Today’s specific stock is managed on{' '}
-          <span className="font-medium text-zinc-700">Availability</span>.
+    <div className="mx-auto max-w-6xl space-y-4 p-4 sm:p-6">
+      <div className="space-y-1">
+        <h1 className="text-xl font-bold text-[#252B28]">منو</h1>
+        <p className="text-sm leading-7 text-[#737B75]">
+          قیمت، زمان آماده‌سازی، مواد تشکیل‌دهنده و تعداد پیش‌فرض روزانه را ویرایش کنید.
+          موجودی مخصوص امروز در بخش{' '}
+          <span className="font-medium text-[#252B28]">موجودی</span> مدیریت می‌شود.
         </p>
       </div>
       <MenuTable rows={rows} />

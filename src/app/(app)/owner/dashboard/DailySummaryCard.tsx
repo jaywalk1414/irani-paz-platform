@@ -3,6 +3,17 @@
 import { useState, useTransition } from 'react';
 import { generateSummaryAction } from './actions';
 
+const toFaDigits = (s: string) => s.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+
+function formatBusinessDate(d: string) {
+  const date = new Date(`${d}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return toFaDigits(d);
+  return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+    dateStyle: 'long',
+    timeZone: 'UTC',
+  }).format(date);
+}
+
 export function DailySummaryCard({
   initialSummary,
   businessDate,
@@ -24,47 +35,57 @@ export function DailySummaryCard({
   }
 
   return (
-    <section className="rounded-lg border bg-gradient-to-br from-indigo-50 to-white p-4 shadow-sm">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
-          <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-indigo-600 text-[10px] font-bold text-white">
-            AI
+    <section
+      aria-busy={pending}
+      className="rounded-xl border border-[#E5E9E5] bg-[#F7F5EF] p-4 shadow-sm"
+    >
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-[#252B28]">
+          <span className="inline-flex items-center rounded-md bg-[#234B3B] px-2 py-0.5 text-[11px] font-medium text-white">
+            هوش مصنوعی
           </span>
-          Daily service summary
+          خلاصه روزانه سرویس
         </h2>
-        <div className="flex items-center gap-2 text-xs text-zinc-500">
+        <div className="flex items-center gap-2 text-xs text-[#737B75]">
           {summary && (
-            <span className="rounded bg-white px-2 py-0.5 font-mono text-[10px]">
+            <span
+              dir="ltr"
+              className="rounded-md border border-[#E5E9E5] bg-white px-2 py-0.5 text-[11px]"
+            >
               {summary.model}
             </span>
           )}
           <button
+            type="button"
             onClick={generate}
             disabled={pending}
-            className="rounded border bg-white px-2 py-1 text-xs hover:bg-zinc-50 disabled:opacity-50"
+            className="rounded-lg border border-[#E5E9E5] bg-white px-3 py-1.5 text-xs font-medium text-[#252B28] transition-colors duration-150 hover:border-[#234B3B] hover:text-[#234B3B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {pending ? 'Generating…' : summary ? 'Regenerate' : 'Generate'}
+            {pending ? 'در حال تولید…' : summary ? 'تولید مجدد' : 'تولید خلاصه'}
           </button>
         </div>
       </div>
 
       {summary ? (
-        <p className="text-sm leading-relaxed text-zinc-700">{summary.content}</p>
+        <p className="text-sm leading-7 text-[#252B28]">{summary.content}</p>
       ) : (
-        <p className="text-sm text-zinc-500">
-          No summary for {businessDate} yet. Generate one to get an overview of
-          today&rsquo;s orders, top sellers, and busy windows.
+        <p className="text-sm leading-7 text-[#737B75]">
+          هنوز خلاصه‌ای برای {formatBusinessDate(businessDate)} ساخته نشده است. با تولید خلاصه،
+          نمای کلی از سفارش‌ها، پرفروش‌ترین‌ها و شلوغ‌ترین بازه‌های امروز را دریافت کنید.
         </p>
       )}
 
       {error && (
-        <p className="mt-2 rounded border border-rose-200 bg-rose-50 px-2 py-1 text-xs text-rose-700">
+        <p
+          role="alert"
+          className="mt-3 rounded-lg border border-[#D9534F]/30 bg-[#D9534F]/10 px-3 py-2 text-xs leading-6 text-[#D9534F]"
+        >
           {error}
         </p>
       )}
 
-      <p className="mt-2 text-[11px] text-zinc-400">
-        Informational only — never changes orders, prices, or availability.
+      <p className="mt-3 text-[11px] leading-6 text-[#737B75]">
+        فقط جنبه اطلاعاتی دارد؛ هرگز سفارش‌ها، قیمت‌ها یا موجودی را تغییر نمی‌دهد.
       </p>
     </section>
   );

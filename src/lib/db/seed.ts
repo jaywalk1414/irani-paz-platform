@@ -59,16 +59,16 @@ const CUTOFF_HOUR = 4; // matches restaurants.business_day_cutoff = '04:00:00'
 const MENU = [
   {
     key: "koobideh",
-    name: "Chelo Kebab Koobideh",
+    name: "چلو کباب کوبیده",
     description:
-      "Two skewers of minced beef kebab served with saffron rice and grilled tomato.",
+      "دو سیخ کباب کوبیده گوشت چرخ‌کرده همراه با برنج زعفرانی و گوجه کبابی.",
     ingredients: [
-      "minced beef",
-      "onion",
-      "saffron",
-      "basmati rice",
-      "butter",
-      "tomato",
+      "گوشت چرخ‌کرده",
+      "پیاز",
+      "زعفران",
+      "برنج باسماتی",
+      "کره",
+      "گوجه",
     ],
     priceToman: 180_000,
     prepTimeMinutes: 15,
@@ -77,16 +77,16 @@ const MENU = [
   },
   {
     key: "joojeh",
-    name: "Joojeh Kebab",
+    name: "کباب جوجه",
     description:
-      "Saffron-marinated chicken kebab with rice and grilled tomato.",
+      "کباب جوجه مرینیت‌شده با زعفران، همراه با برنج و گوجه کبابی.",
     ingredients: [
-      "chicken",
-      "saffron",
-      "yogurt",
-      "onion",
-      "basmati rice",
-      "butter",
+      "مرغ",
+      "زعفران",
+      "ماست",
+      "پیاز",
+      "برنج باسماتی",
+      "کره",
     ],
     priceToman: 220_000,
     prepTimeMinutes: 18,
@@ -95,15 +95,15 @@ const MENU = [
   },
   {
     key: "barg",
-    name: "Barg Kebab",
+    name: "کباب برگ",
     description:
-      "Filet mignon kebab, saffron-marinated, served with rice and butter.",
+      "کباب برگ فیله گوساله مرینیت‌شده با زعفران، همراه با برنج و کره.",
     ingredients: [
-      "beef filet",
-      "saffron",
-      "basmati rice",
-      "butter",
-      "grilled tomato",
+      "فیله گوساله",
+      "زعفران",
+      "برنج باسماتی",
+      "کره",
+      "گوجه کبابی",
     ],
     priceToman: 320_000,
     prepTimeMinutes: 15,
@@ -112,15 +112,15 @@ const MENU = [
   },
   {
     key: "ghormeh",
-    name: "Ghormeh Sabzi",
+    name: "قورمه سبزی",
     description:
-      "Herb stew with beef, kidney beans, and dried lime; served with rice.",
+      "خورش سبزی با گوشت گوساله، لوبیا قرمز و لیمو عمانی؛ همراه با برنج.",
     ingredients: [
-      "herbs",
-      "beef",
-      "kidney beans",
-      "dried lime",
-      "basmati rice",
+      "سبزی",
+      "گوشت گوساله",
+      "لوبیا قرمز",
+      "لیمو عمانی",
+      "برنج باسماتی",
     ],
     priceToman: 240_000,
     prepTimeMinutes: 8,
@@ -129,16 +129,16 @@ const MENU = [
   },
   {
     key: "gheymeh",
-    name: "Gheymeh",
+    name: "قیمه",
     description:
-      "Split-pea and beef stew with tomato, dried lime, and fries; served with rice.",
+      "خورش قیمه با لپه، گوشت گوساله، رب گوجه، لیمو عمانی و سیب‌زمینی سرخ‌کرده؛ همراه با برنج.",
     ingredients: [
-      "split peas",
-      "beef",
-      "tomato paste",
-      "dried lime",
-      "potato",
-      "basmati rice",
+      "لپه",
+      "گوشت گوساله",
+      "رب گوجه",
+      "لیمو عمانی",
+      "سیب‌زمینی",
+      "برنج باسماتی",
     ],
     priceToman: 220_000,
     prepTimeMinutes: 8,
@@ -147,9 +147,9 @@ const MENU = [
   },
   {
     key: "fesenjan",
-    name: "Fesenjan",
-    description: "Walnut and pomegranate stew with chicken; served with rice.",
-    ingredients: ["walnut", "pomegranate paste", "chicken", "basmati rice"],
+    name: "فسنجان",
+    description: "خورش فسنجان با گردو و رب انار همراه با مرغ؛ همراه با برنج.",
+    ingredients: ["گردو", "رب انار", "مرغ", "برنج باسماتی"],
     priceToman: 260_000,
     prepTimeMinutes: 10,
     prepGroup: "stew_rice" as const,
@@ -157,9 +157,9 @@ const MENU = [
   },
   {
     key: "fries",
-    name: "French Fries",
-    description: "Hand-cut fries with sea salt.",
-    ingredients: ["potato", "salt", "oil"],
+    name: "سیب‌زمینی سرخ‌کرده",
+    description: "سیب‌زمینی سرخ‌کرده دست‌برش با نمک دریایی.",
+    ingredients: ["سیب‌زمینی", "نمک", "روغن"],
     priceToman: 80_000,
     prepTimeMinutes: 6,
     prepGroup: "fryer" as const,
@@ -167,9 +167,9 @@ const MENU = [
   },
   {
     key: "fried_chicken",
-    name: "Fried Chicken",
-    description: "Crispy battered chicken pieces.",
-    ingredients: ["chicken", "flour", "breadcrumbs", "spice mix"],
+    name: "مرغ سوخاری",
+    description: "تکه‌های مرغ سوخاری با پوشش ترد.",
+    ingredients: ["مرغ", "آرد", "پودر سوخاری", "ادویه"],
     priceToman: 190_000,
     prepTimeMinutes: 12,
     prepGroup: "fryer" as const,
@@ -177,9 +177,9 @@ const MENU = [
   },
   {
     key: "pizza",
-    name: "Pizza Margherita",
-    description: "Wood-fired pizza with tomato, mozzarella, and basil.",
-    ingredients: ["dough", "tomato", "mozzarella", "basil"],
+    name: "پیتزا مارگاریتا",
+    description: "پیتزا پخته‌شده در تنور با گوجه، موزارلا و ریحان.",
+    ingredients: ["خمیر", "گوجه", "موزارلا", "ریحان"],
     priceToman: 260_000,
     prepTimeMinutes: 14,
     prepGroup: "other" as const,
@@ -187,9 +187,9 @@ const MENU = [
   },
   {
     key: "shirazi",
-    name: "Shirazi Salad",
-    description: "Cucumber, tomato, and onion with mint and lemon.",
-    ingredients: ["cucumber", "tomato", "onion", "mint", "lemon juice"],
+    name: "سالاد شیرازی",
+    description: "خیار، گوجه و پیاز با نعناع و آبلیمو.",
+    ingredients: ["خیار", "گوجه", "پیاز", "نعناع", "آبلیمو"],
     priceToman: 60_000,
     prepTimeMinutes: 4,
     prepGroup: "cold" as const,
@@ -197,9 +197,9 @@ const MENU = [
   },
   {
     key: "mast",
-    name: "Mast-o-Khiar",
-    description: "Yogurt with cucumber and dried mint.",
-    ingredients: ["yogurt", "cucumber", "dried mint"],
+    name: "ماست‌و‌خیار",
+    description: "ماست با خیار و نعناع خشک.",
+    ingredients: ["ماست", "خیار", "نعناع خشک"],
     priceToman: 45_000,
     prepTimeMinutes: 3,
     prepGroup: "cold" as const,
@@ -207,9 +207,9 @@ const MENU = [
   },
   {
     key: "doogh",
-    name: "House Doogh",
-    description: "Carbonated yogurt drink with mint and salt.",
-    ingredients: ["yogurt", "water", "mint", "salt"],
+    name: "دوغ خانگی",
+    description: "نوشیدنی دوغ گازدار با نعناع و نمک.",
+    ingredients: ["ماست", "آب", "نعناع", "نمک"],
     priceToman: 35_000,
     prepTimeMinutes: 1,
     prepGroup: "beverage" as const,
@@ -217,8 +217,8 @@ const MENU = [
   },
   {
     key: "coke",
-    name: "Coca-Cola (can)",
-    description: "Chilled 330 ml can.",
+    name: "کوکاکولا (قوطی)",
+    description: "قوطی ۳۳۰ میلی‌لیتری سرد.",
     ingredients: [],
     priceToman: 25_000,
     prepTimeMinutes: 1,
@@ -228,14 +228,14 @@ const MENU = [
 ] as const;
 
 const TABLES = [
-  { label: "T1", seats: 2 },
-  { label: "T2", seats: 2 },
-  { label: "T3", seats: 4 },
-  { label: "T4", seats: 4 },
-  { label: "T5", seats: 4 },
-  { label: "T6", seats: 6 },
-  { label: "T7", seats: 6 },
-  { label: "T8", seats: 8 },
+  { label: "میز ۱", seats: 2 },
+  { label: "میز ۲", seats: 2 },
+  { label: "میز ۳", seats: 4 },
+  { label: "میز ۴", seats: 4 },
+  { label: "میز ۵", seats: 4 },
+  { label: "میز ۶", seats: 6 },
+  { label: "میز ۷", seats: 6 },
+  { label: "میز ۸", seats: 8 },
 ];
 
 const DEMO_PASSWORD = "demo1234";
@@ -264,6 +264,7 @@ async function main() {
       ai_daily_summaries,
       availability_adjustments,
       daily_availability,
+      order_submissions,
       order_status_history,
       order_items,
       orders,
@@ -279,7 +280,7 @@ async function main() {
   const [restaurant] = await db
     .insert(s.restaurants)
     .values({
-      name: "Shabestan Restaurant",
+      name: "رستوران شبستان",
       timezone: "Asia/Tehran",
       businessDayCutoff: `${String(CUTOFF_HOUR).padStart(2, "0")}:00:00`,
     })
@@ -289,8 +290,8 @@ async function main() {
     .insert(s.branches)
     .values({
       restaurantId: restaurant.id,
-      name: "Main Branch",
-      address: "Valiasr St., Tehran",
+      name: "شعبه اصلی",
+      address: "خیابان ولیعصر، تهران",
     })
     .returning();
 
@@ -307,7 +308,7 @@ async function main() {
         branchId: null,
         email: "owner@demo.local",
         passwordHash,
-        fullName: "Nadia Ahmadi",
+        fullName: "نادیا احمدی",
         role: "owner",
       },
       {
@@ -315,7 +316,7 @@ async function main() {
         branchId: branch.id,
         email: "waiter@demo.local",
         passwordHash,
-        fullName: "Sara Karimi",
+        fullName: "سارا کریمی",
         role: "waiter",
       },
       {
@@ -323,7 +324,7 @@ async function main() {
         branchId: branch.id,
         email: "waiter2@demo.local",
         passwordHash,
-        fullName: "Reza Jafari",
+        fullName: "رضا جعفری",
         role: "waiter",
       },
       {
@@ -331,7 +332,7 @@ async function main() {
         branchId: branch.id,
         email: "kitchen@demo.local",
         passwordHash,
-        fullName: "Hossein Moradi",
+        fullName: "حسین مرادی",
         role: "kitchen",
       },
     ])
@@ -388,15 +389,15 @@ async function main() {
   console.log(`Tables: ${tableRows.length}`);
 
   // ---- 6. Today's active orders (hand-crafted) ----
-  // Order A: table T3, Sara, already in the kitchen (preparing).
-  // Order B: table T5, Reza, just confirmed (pending).
+  // Order A: table "میز ۳", Sara, already in the kitchen (preparing).
+  // Order B: table "میز ۵", Reza, just confirmed (pending).
   const now = Date.now();
   const tA = new Date(now - 8 * 60 * 1000);
   const tB = new Date(now - 2 * 60 * 1000);
 
   const activeOrderPlans = [
     {
-      tableLabel: "T3",
+      tableLabel: "میز ۳",
       createdByUserId: waiter1.id,
       status: "preparing" as const,
       idempotencyKey: `seed-${businessDate}-active-A`,
@@ -410,7 +411,7 @@ async function main() {
       itemStatus: "preparing" as const,
     },
     {
-      tableLabel: "T5",
+      tableLabel: "میز ۵",
       createdByUserId: waiter2.id,
       status: "confirmed" as const,
       idempotencyKey: `seed-${businessDate}-active-B`,
@@ -444,8 +445,9 @@ async function main() {
         restaurantId: restaurant.id,
         menuItemId: item.id,
         businessDate,
+        // Compare by id, not by name — resilient to future translations.
         configuredQuantity:
-          item.name === menuByKey.koobideh.name
+          item.id === menuByKey.koobideh.id
             ? koobidehAdjustedTo
             : item.dailyQuantityDefault,
         reservedQuantity: reservedToday[item.id] ?? 0,
@@ -467,7 +469,7 @@ async function main() {
     previousConfigured: 25,
     newConfigured: koobidehAdjustedTo,
     deltaConfigured: koobidehAdjustedTo - 25,
-    reason: "Grill slower than expected; reserving buffer for lunch rush.",
+    reason: "گریل کندتر از حد انتظار بود؛ رزرو بافر برای شلوغی ناهار.",
   });
 
   // ---- 9. Historical orders (yesterday, day before) ----
@@ -654,16 +656,17 @@ async function main() {
       .length,
     orders: (await db.select().from(s.orders)).length,
     orderItems: (await db.select().from(s.orderItems)).length,
+    orderSubmissions: (await db.select().from(s.orderSubmissions)).length,
     orderStatusHistory: (await db.select().from(s.orderStatusHistory)).length,
   };
 
   console.log("\nSeed complete.");
   console.table(counts);
   console.log("\nDemo credentials (password for all):", DEMO_PASSWORD);
-  console.log("  owner   → owner@demo.local");
-  console.log("  waiter  → waiter@demo.local   (Sara, has active order on T3)");
-  console.log("  waiter2 → waiter2@demo.local  (Reza, has active order on T5)");
-  console.log("  kitchen → kitchen@demo.local  (Hossein)");
+  console.log("  owner   → owner@demo.local   (نادیا احمدی)");
+  console.log("  waiter  → waiter@demo.local  (سارا کریمی — سفارش فعال روی میز ۳)");
+  console.log("  waiter2 → waiter2@demo.local (رضا جعفری — سفارش فعال روی میز ۵)");
+  console.log("  kitchen → kitchen@demo.local (حسین مرادی)");
   console.log(`\nBusiness date: ${businessDate}`);
 }
 

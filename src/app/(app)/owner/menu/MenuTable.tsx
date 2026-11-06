@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useTransition } from 'react';
+import { useId, useState, useTransition } from "react";
 import {
   createMenuItemAction,
   updateMenuItemAction,
   toggleMenuItemActiveAction,
-} from './actions';
+} from "./actions";
 
 export interface MenuRow {
   id: string;
@@ -22,102 +22,122 @@ export interface MenuRow {
 }
 
 type DialogState =
-  | { mode: 'closed' }
-  | { mode: 'create' }
-  | { mode: 'edit'; row: MenuRow };
+  | { mode: "closed" }
+  | { mode: "create" }
+  | { mode: "edit"; row: MenuRow };
+
+const fa = (n: number) => n.toLocaleString("fa-IR");
+
+const fieldClass =
+  "mt-1.5 block w-full rounded-lg border border-[#E5E9E5] bg-white px-3 py-2 text-sm text-[#252B28] " +
+  "placeholder:text-[#737B75]/70 transition-colors duration-150 hover:border-[#737B75]/50 " +
+  "focus:border-[#234B3B] focus:outline-none focus:ring-2 focus:ring-[#234B3B]/20";
+
+const numberFieldClass = `${fieldClass} text-end`;
+
+const secondaryBtn =
+  "rounded-lg border border-[#E5E9E5] bg-white px-3 py-1.5 text-xs font-medium text-[#252B28] " +
+  "transition-colors duration-150 hover:border-[#234B3B] hover:text-[#234B3B] " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40 " +
+  "disabled:cursor-not-allowed disabled:opacity-50";
 
 export function MenuTable({ rows }: { rows: MenuRow[] }) {
-  const [dialog, setDialog] = useState<DialogState>({ mode: 'closed' });
+  const [dialog, setDialog] = useState<DialogState>({ mode: "closed" });
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-zinc-500">
-          {rows.length} item{rows.length === 1 ? '' : 's'}
-        </span>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm text-[#737B75]">{fa(rows.length)} آیتم</span>
         <button
-          onClick={() => setDialog({ mode: 'create' })}
-          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+          type="button"
+          onClick={() => setDialog({ mode: "create" })}
+          className="rounded-lg bg-[#234B3B] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-[#193A2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B] focus-visible:ring-offset-2"
         >
-          + New item
+          + آیتم جدید
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="border-b bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500">
+      <div className="overflow-x-auto rounded-xl border border-[#E5E9E5] bg-white shadow-sm">
+        <table className="w-full min-w-[720px] text-sm">
+          <thead className="border-b border-[#E5E9E5] bg-[#F7F5EF] text-xs font-semibold text-[#737B75]">
             <tr>
-              <th className="px-3 py-2">Item</th>
-              <th className="px-3 py-2 text-right">Price</th>
-              <th className="px-3 py-2 text-right">Prep</th>
-              <th className="px-3 py-2 text-right">Default</th>
-              <th className="px-3 py-2 text-right">Today</th>
-              <th className="px-3 py-2">Status</th>
-              <th className="px-3 py-2 text-right">Actions</th>
+              <th className="px-3 py-3 text-start">آیتم</th>
+              <th className="px-3 py-3 text-start">قیمت (تومان)</th>
+              <th className="px-3 py-3 text-start">آماده‌سازی</th>
+              <th className="px-3 py-3 text-start">پیش‌فرض</th>
+              <th className="px-3 py-3 text-start">امروز</th>
+              <th className="px-3 py-3 text-start">وضعیت</th>
+              <th className="px-3 py-3 text-end">عملیات</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-[#E5E9E5] text-[#252B28]">
             {rows.map((row) => (
-              <tr key={row.id} className={row.isActive ? '' : 'opacity-60'}>
-                <td className="px-3 py-2">
+              <tr
+                key={row.id}
+                className={`transition-colors duration-150 hover:bg-[#F8F9F6] ${
+                  row.isActive ? "" : "opacity-60"
+                }`}
+              >
+                <td className="px-3 py-3">
                   <div className="font-medium">{row.name}</div>
-                  <div className="text-xs text-zinc-500">
+                  <div className="text-xs text-[#737B75]">
                     {prepGroupLabel(row.prepGroup)}
                   </div>
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">
-                  {row.priceToman.toLocaleString('fa-IR')}
+                <td className="px-3 py-3 tabular-nums">{fa(row.priceToman)}</td>
+                <td className="px-3 py-3 tabular-nums">
+                  {fa(row.prepTimeMinutes)} دقیقه
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">
-                  {row.prepTimeMinutes} min
+                <td className="px-3 py-3 tabular-nums">
+                  {fa(row.dailyQuantityDefault)}
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums">
-                  {row.dailyQuantityDefault}
-                </td>
-                <td className="px-3 py-2 text-right tabular-nums">
+                <td className="px-3 py-3 tabular-nums">
                   {row.todayAvailable === null ? (
-                    <span className="text-zinc-400">—</span>
+                    <span className="text-[#737B75]">—</span>
                   ) : (
                     <span
                       className={
                         row.todayAvailable === 0
-                          ? 'text-rose-600'
+                          ? "font-semibold text-[#D9534F]"
                           : row.todayAvailable <= 3
-                            ? 'text-amber-600'
-                            : ''
+                            ? "font-semibold text-[#D99A32]"
+                            : ""
                       }
                     >
-                      {row.todayAvailable}
-                      <span className="text-xs text-zinc-400">
-                        {' '}
-                        / {row.todayConfigured}
+                      {fa(row.todayAvailable)}
+                      <span className="text-xs font-normal text-[#737B75]">
+                        {" "}
+                        از {fa(row.todayConfigured ?? 0)}
                       </span>
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2">
+                <td className="px-3 py-3">
                   <span
-                    className={`rounded border px-2 py-0.5 text-[11px] ${
+                    className={`inline-block rounded-md border px-2 py-0.5 text-[11px] font-medium ${
                       row.isActive
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                        : 'border-zinc-200 bg-zinc-50 text-zinc-500'
+                        ? "border-[#27845A]/30 bg-[#27845A]/10 text-[#27845A]"
+                        : "border-[#E5E9E5] bg-[#F8F9F6] text-[#737B75]"
                     }`}
                   >
-                    {row.isActive ? 'Active' : 'Inactive'}
+                    {row.isActive ? "فعال" : "غیرفعال"}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="px-3 py-3 text-end">
                   <RowActions
                     row={row}
-                    onEdit={() => setDialog({ mode: 'edit', row })}
+                    onEdit={() => setDialog({ mode: "edit", row })}
                   />
                 </td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-sm text-zinc-500">
-                  No items yet. Create one to get started.
+                <td
+                  colSpan={7}
+                  className="px-3 py-10 text-center text-sm text-[#737B75]"
+                >
+                  هنوز آیتمی ثبت نشده است. برای شروع، یک آیتم جدید بسازید.
                 </td>
               </tr>
             )}
@@ -125,11 +145,11 @@ export function MenuTable({ rows }: { rows: MenuRow[] }) {
         </table>
       </div>
 
-      {dialog.mode !== 'closed' && (
+      {dialog.mode !== "closed" && (
         <MenuItemDialog
           mode={dialog.mode}
-          row={dialog.mode === 'edit' ? dialog.row : undefined}
-          onClose={() => setDialog({ mode: 'closed' })}
+          row={dialog.mode === "edit" ? dialog.row : undefined}
+          onClose={() => setDialog({ mode: "closed" })}
         />
       )}
     </>
@@ -144,25 +164,23 @@ function RowActions({ row, onEdit }: { row: MenuRow; onEdit: () => void }) {
     setError(null);
     start(async () => {
       const result = await toggleMenuItemActiveAction(row.id, !row.isActive);
-      if (!result.ok) setError(result.error ?? 'Failed.');
+      if (!result.ok) setError(result.error ?? "انجام نشد.");
     });
   }
 
   return (
     <div className="inline-flex items-center gap-2">
-      {error && <span className="text-[11px] text-rose-600">{error}</span>}
-      <button
-        onClick={onEdit}
-        className="rounded border px-2 py-1 text-xs hover:bg-zinc-50"
-      >
-        Edit
+      {error && <span className="text-[11px] text-[#D9534F]">{error}</span>}
+      <button type="button" onClick={onEdit} className={secondaryBtn}>
+        ویرایش
       </button>
       <button
+        type="button"
         onClick={toggle}
         disabled={pending}
-        className="rounded border px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+        className={`${secondaryBtn} text-[#737B75]`}
       >
-        {row.isActive ? 'Deactivate' : 'Activate'}
+        {row.isActive ? "غیرفعال‌سازی" : "فعال‌سازی"}
       </button>
     </div>
   );
@@ -173,37 +191,43 @@ function MenuItemDialog({
   row,
   onClose,
 }: {
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   row?: MenuRow;
   onClose: () => void;
 }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const titleId = useId();
 
   function handleSubmit(formData: FormData) {
     setError(null);
     start(async () => {
-      const action = mode === 'create' ? createMenuItemAction : updateMenuItemAction;
+      const action =
+        mode === "create" ? createMenuItemAction : updateMenuItemAction;
       const result = await action(null, formData);
       if (result.ok) onClose();
-      else setError(result.error ?? 'Failed.');
+      else setError(result.error ?? "انجام نشد.");
     });
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 pt-12">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[#252B28]/50 p-4 pt-12">
       <form
         action={handleSubmit}
-        className="w-full max-w-lg space-y-3 rounded-lg bg-white p-4 shadow-xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="w-full max-w-lg space-y-4 rounded-xl border border-[#E5E9E5] bg-white p-5 shadow-xl"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">
-            {mode === 'create' ? 'New menu item' : 'Edit menu item'}
+          <h2 id={titleId} className="text-base font-bold text-[#252B28]">
+            {mode === "create" ? "آیتم جدید منو" : "ویرایش آیتم منو"}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-sm text-zinc-500 hover:text-zinc-800"
+            aria-label="بستن"
+            className="rounded-lg px-2 py-1 text-sm text-[#737B75] transition-colors duration-150 hover:bg-[#F7F5EF] hover:text-[#252B28] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40"
           >
             ✕
           </button>
@@ -212,121 +236,128 @@ function MenuItemDialog({
         {row && <input type="hidden" name="id" value={row.id} />}
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block text-sm sm:col-span-2">
-            Name
+          <label className="block text-sm font-medium text-[#252B28] sm:col-span-2">
+            نام
             <input
               name="name"
-              defaultValue={row?.name ?? ''}
+              defaultValue={row?.name ?? ""}
               required
               maxLength={120}
-              className="mt-1 w-full rounded border px-2 py-1.5 text-sm"
+              className={fieldClass}
             />
           </label>
 
-          <label className="block text-sm sm:col-span-2">
-            Description
+          <label className="block text-sm font-medium text-[#252B28] sm:col-span-2">
+            توضیحات
             <textarea
               name="description"
-              defaultValue={row?.description ?? ''}
+              defaultValue={row?.description ?? ""}
               rows={2}
               maxLength={1000}
-              className="mt-1 w-full rounded border px-2 py-1.5 text-sm"
+              className={fieldClass}
             />
           </label>
 
-          <label className="block text-sm sm:col-span-2">
-            Ingredients (comma-separated)
+          <label className="block text-sm font-medium text-[#252B28] sm:col-span-2">
+            مواد تشکیل‌دهنده (با ویرگول جدا کنید)
             <input
               name="ingredients"
-              defaultValue={row?.ingredientsText ?? ''}
-              placeholder="beef, saffron, rice"
-              className="mt-1 w-full rounded border px-2 py-1.5 text-sm"
+              defaultValue={row?.ingredientsText ?? ""}
+              placeholder="گوشت, زعفران, برنج"
+              className={fieldClass}
             />
           </label>
 
-          <label className="block text-sm">
-            Price (toman)
+          <label className="block text-sm font-medium text-[#252B28]">
+            قیمت (تومان)
             <input
               name="priceToman"
               type="number"
+              dir="ltr"
               min={0}
               step={1000}
               defaultValue={row?.priceToman ?? 0}
               required
-              className="mt-1 w-full rounded border px-2 py-1.5 text-sm"
+              className={numberFieldClass}
             />
           </label>
 
-          <label className="block text-sm">
-            Prep time (minutes)
+          <label className="block text-sm font-medium text-[#252B28]">
+            زمان آماده‌سازی (دقیقه)
             <input
               name="prepTimeMinutes"
               type="number"
+              dir="ltr"
               min={1}
               defaultValue={row?.prepTimeMinutes ?? 10}
               required
-              className="mt-1 w-full rounded border px-2 py-1.5 text-sm"
+              className={numberFieldClass}
             />
           </label>
 
-          <label className="block text-sm">
-            Prep group
+          <label className="block text-sm font-medium text-[#252B28]">
+            گروه آماده‌سازی
             <select
               name="prepGroup"
-              defaultValue={row?.prepGroup ?? 'other'}
-              className="mt-1 w-full rounded border px-2 py-1.5 text-sm"
+              defaultValue={row?.prepGroup ?? "other"}
+              className={fieldClass}
             >
-              <option value="grill">Grill</option>
-              <option value="fryer">Fryer</option>
-              <option value="stew_rice">Stew &amp; Rice</option>
-              <option value="cold">Cold</option>
-              <option value="beverage">Beverage</option>
-              <option value="other">Other</option>
+              <option value="grill">گریل</option>
+              <option value="fryer">سرخ‌کن</option>
+              <option value="stew_rice">خورش و برنج</option>
+              <option value="cold">سرد</option>
+              <option value="beverage">نوشیدنی</option>
+              <option value="other">سایر</option>
             </select>
           </label>
 
-          <label className="block text-sm">
-            Default daily qty
+          <label className="block text-sm font-medium text-[#252B28]">
+            تعداد پیش‌فرض روزانه
             <input
               name="dailyQuantityDefault"
               type="number"
+              dir="ltr"
               min={0}
               defaultValue={row?.dailyQuantityDefault ?? 20}
               required
-              className="mt-1 w-full rounded border px-2 py-1.5 text-sm"
+              className={numberFieldClass}
             />
           </label>
         </div>
 
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-sm text-[#252B28]">
           <input
             type="checkbox"
             name="isActive"
             defaultChecked={row?.isActive ?? true}
+            className="h-4 w-4 rounded border-[#E5E9E5] accent-[#234B3B]"
           />
-          Active (available for ordering)
+          فعال (قابل سفارش)
         </label>
 
         {error && (
-          <p className="rounded border border-rose-200 bg-rose-50 px-2 py-1.5 text-xs text-rose-700">
+          <p
+            role="alert"
+            className="rounded-lg border border-[#D9534F]/30 bg-[#D9534F]/10 px-3 py-2 text-xs leading-6 text-[#D9534F]"
+          >
             {error}
           </p>
         )}
 
-        <div className="flex justify-end gap-2 border-t pt-2">
+        <div className="flex justify-end gap-2 border-t border-[#E5E9E5] pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded border px-3 py-1.5 text-sm hover:bg-zinc-50"
+            className="rounded-lg border border-[#E5E9E5] bg-white px-4 py-2 text-sm font-medium text-[#252B28] transition-colors duration-150 hover:bg-[#F7F5EF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40"
           >
-            Cancel
+            انصراف
           </button>
           <button
             type="submit"
             disabled={pending}
-            className="rounded bg-black px-4 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+            className="rounded-lg bg-[#234B3B] px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-[#193A2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {pending ? 'Saving…' : 'Save'}
+            {pending ? "در حال ذخیره…" : "ذخیره"}
           </button>
         </div>
       </form>
@@ -336,12 +367,12 @@ function MenuItemDialog({
 
 function prepGroupLabel(g: string): string {
   const map: Record<string, string> = {
-    grill: 'Grill',
-    fryer: 'Fryer',
-    stew_rice: 'Stew & Rice',
-    cold: 'Cold',
-    beverage: 'Beverage',
-    other: 'Other',
+    grill: "گریل",
+    fryer: "سرخ‌کن",
+    stew_rice: "خورش و برنج",
+    cold: "سرد",
+    beverage: "نوشیدنی",
+    other: "سایر",
   };
   return map[g] ?? g;
 }

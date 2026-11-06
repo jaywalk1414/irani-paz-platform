@@ -29,6 +29,35 @@ interface Props {
   initialExistingOrder: OrderView | null;
 }
 
+const fa = (n: number) => n.toLocaleString('fa-IR');
+
+const tableStatusLabel: Record<string, string> = {
+  available: 'آزاد',
+  occupied: 'اشغال',
+  reserved: 'رزرو شده',
+};
+
+const itemStatusLabel: Record<string, string> = {
+  pending: 'در انتظار',
+  preparing: 'در حال آماده‌سازی',
+  ready: 'آماده',
+  served: 'سرو شده',
+  cancelled: 'لغو شده',
+};
+
+const inputClass =
+  'block w-full rounded-lg border border-[#E5E9E5] bg-white px-3 py-2 text-xs text-[#252B28] ' +
+  'placeholder:text-[#737B75]/70 transition-colors duration-150 hover:border-[#737B75]/50 ' +
+  'focus:border-[#234B3B] focus:outline-none focus:ring-2 focus:ring-[#234B3B]/20';
+
+const primaryBtn =
+  'rounded-lg bg-[#234B3B] px-5 py-2.5 text-sm font-semibold text-white shadow-sm ' +
+  'transition-colors duration-150 hover:bg-[#193A2D] ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B] focus-visible:ring-offset-2 ' +
+  'disabled:cursor-not-allowed disabled:bg-[#E5E9E5] disabled:text-[#737B75] disabled:shadow-none';
+
+const sectionTitle = 'mb-2 text-xs font-semibold text-[#737B75]';
+
 export function OrderFlow({
   menu,
   tables,
@@ -200,28 +229,29 @@ export function OrderFlow({
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">
       {/* Sticky header — table context always visible */}
-      <div className="sticky top-14 z-30 border-b bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-2">
+      <div className="sticky top-14 z-30 border-b border-[#E5E9E5] bg-white">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-3">
             {step !== 'table' && (
               <button
+                type="button"
                 onClick={() => setStep(step === 'review' ? 'menu' : 'table')}
-                className="text-sm text-zinc-600 hover:text-zinc-900"
+                className="rounded-lg px-2 py-1 text-sm text-[#737B75] transition-colors duration-150 hover:bg-[#F7F5EF] hover:text-[#252B28] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40"
               >
-                ← Back
+                → بازگشت
               </button>
             )}
             <div>
-              <div className="text-xs text-zinc-500">
-                {step === 'table' && 'Step 1 of 3'}
-                {step === 'menu' && 'Step 2 of 3'}
-                {step === 'review' && 'Step 3 of 3'}
+              <div className="text-xs text-[#737B75]">
+                {step === 'table' && 'مرحله ۱ از ۳'}
+                {step === 'menu' && 'مرحله ۲ از ۳'}
+                {step === 'review' && 'مرحله ۳ از ۳'}
               </div>
-              <div className="text-sm font-semibold">
-                {table ? `${table.label} · Ordering` : 'Select a table'}
+              <div className="text-sm font-semibold text-[#252B28]">
+                {table ? `میز ${table.label} ـ ثبت سفارش` : 'انتخاب میز'}
                 {initialExistingOrder && step !== 'table' && (
-                  <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
-                    Adding to existing
+                  <span className="ms-2 rounded-md bg-[#D99A32]/15 px-1.5 py-0.5 text-[10px] font-medium text-[#252B28]">
+                    افزودن به سفارش فعلی
                   </span>
                 )}
               </div>
@@ -263,34 +293,34 @@ export function OrderFlow({
 
       {/* Sticky footer — total + CTA */}
       {step !== 'table' && (
-        <div className="sticky bottom-0 z-30 border-t bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="sticky bottom-0 z-30 border-t border-[#E5E9E5] bg-white shadow-[0_-1px_3px_rgba(0,0,0,0.04)]">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3">
             <div>
-              <div className="text-xs text-zinc-500">
-                {itemCount} item{itemCount === 1 ? '' : 's'}
-              </div>
-              <div className="text-base font-semibold">
-                {totalToman.toLocaleString('fa-IR')} toman
+              <div className="text-xs text-[#737B75]">{fa(itemCount)} آیتم</div>
+              <div className="text-base font-bold text-[#252B28]">
+                {fa(totalToman)} تومان
               </div>
             </div>
 
             {step === 'menu' && (
               <button
+                type="button"
                 onClick={() => setStep('review')}
                 disabled={cart.length === 0}
-                className="rounded-md bg-black px-5 py-2.5 text-sm font-medium text-white disabled:bg-zinc-300"
+                className={primaryBtn}
               >
-                Review order →
+                بررسی سفارش ←
               </button>
             )}
 
             {step === 'review' && (
               <button
+                type="button"
                 onClick={submit}
                 disabled={submitting || cart.length === 0 || blockedLines.length > 0}
-                className="rounded-md bg-black px-5 py-2.5 text-sm font-medium text-white disabled:bg-zinc-300"
+                className={primaryBtn}
               >
-                {submitting ? 'Submitting…' : 'Confirm order'}
+                {submitting ? 'در حال ثبت…' : 'تأیید و ثبت سفارش'}
               </button>
             )}
           </div>
@@ -315,14 +345,19 @@ function TablePicker({
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
       {tables.map((t) => (
         <button
+          type="button"
           key={t.id}
           onClick={() => onSelect(t.id)}
-          className="flex flex-col items-start gap-1 rounded-lg border bg-white p-3 text-left shadow-sm transition hover:shadow-md"
+          className="flex flex-col items-start gap-1 rounded-xl border border-[#E5E9E5] bg-white p-3.5 text-start shadow-sm transition-shadow duration-150 hover:border-[#234B3B]/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/50"
         >
-          <span className="text-lg font-semibold">{t.label}</span>
-          <span className="text-xs text-zinc-500">{t.seats} seats</span>
-          <span className="text-[11px] text-zinc-400">
-            {t.status === 'available' ? 'Available' : t.status}
+          <span className="text-lg font-bold text-[#252B28]">{t.label}</span>
+          <span className="text-xs text-[#737B75]">{fa(t.seats)} صندلی</span>
+          <span
+            className={`text-[11px] font-medium ${
+              t.status === 'available' ? 'text-[#27845A]' : 'text-[#737B75]'
+            }`}
+          >
+            {tableStatusLabel[t.status] ?? t.status}
           </span>
         </button>
       ))}
@@ -362,17 +397,20 @@ function MenuStep({
   return (
     <div className="space-y-6">
       {existingOrder && existingOrder.items.length > 0 && (
-        <details className="rounded-lg border bg-amber-50 p-3 text-sm">
-          <summary className="cursor-pointer font-medium text-amber-800">
-            Existing items on {existingOrder.tableLabel} ({existingOrder.items.length})
+        <details className="rounded-xl border border-[#D99A32]/40 bg-[#D99A32]/10 p-3 text-sm">
+          <summary className="cursor-pointer font-medium text-[#252B28]">
+            آیتم‌های قبلی میز {existingOrder.tableLabel} ({fa(existingOrder.items.length)})
           </summary>
-          <ul className="mt-2 space-y-1 text-xs text-amber-900">
+          <ul className="mt-2 space-y-1.5 text-xs text-[#252B28]">
             {existingOrder.items.map((i) => (
-              <li key={i.id} className="flex justify-between">
+              <li key={i.id} className="flex justify-between gap-3">
                 <span>
-                  {i.quantity}× {i.name} <span className="opacity-60">({i.status})</span>
+                  {fa(i.quantity)} عدد {i.name}{' '}
+                  <span className="text-[#737B75]">
+                    ({itemStatusLabel[i.status] ?? i.status})
+                  </span>
                 </span>
-                <span>{(i.unitPriceToman * i.quantity).toLocaleString('fa-IR')}</span>
+                <span className="tabular-nums">{fa(i.unitPriceToman * i.quantity)}</span>
               </li>
             ))}
           </ul>
@@ -381,7 +419,7 @@ function MenuStep({
 
       {Object.entries(byGroup).map(([group, items]) => (
         <section key={group} className="space-y-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          <h2 className="text-xs font-semibold text-[#737B75]">
             {prepGroupLabel(group)}
           </h2>
           <ul className="space-y-2">
@@ -394,34 +432,34 @@ function MenuStep({
               return (
                 <li
                   key={m.menuItemId}
-                  className={`rounded-lg border bg-white p-3 shadow-sm ${
-                    line ? 'ring-2 ring-black/5' : ''
+                  className={`rounded-xl border bg-white p-3.5 shadow-sm ${
+                    line ? 'border-[#234B3B]/50 ring-1 ring-[#234B3B]/20' : 'border-[#E5E9E5]'
                   } ${unavailable && !line ? 'opacity-60' : ''}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-medium">{m.name}</span>
+                        <span className="font-medium text-[#252B28]">{m.name}</span>
                         {unavailable && (
-                          <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-medium text-rose-700">
-                            Unavailable
+                          <span className="rounded-md bg-[#D9534F]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#D9534F]">
+                            ناموجود
                           </span>
                         )}
                         {insufficient && (
-                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
-                            Only {avail} left
+                          <span className="rounded-md bg-[#D99A32]/15 px-1.5 py-0.5 text-[10px] font-medium text-[#252B28]">
+                            فقط {fa(avail)} عدد مانده
                           </span>
                         )}
                       </div>
                       {m.description && (
-                        <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500">
+                        <p className="mt-0.5 line-clamp-2 text-xs leading-6 text-[#737B75]">
                           {m.description}
                         </p>
                       )}
-                      <div className="mt-1 flex items-center gap-3 text-xs text-zinc-500">
-                        <span>{m.priceToman.toLocaleString('fa-IR')} toman</span>
-                        <span>· {m.prepTimeMinutes} min</span>
-                        <span>· {avail} available</span>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[#737B75]">
+                        <span>{fa(m.priceToman)} تومان</span>
+                        <span>{fa(m.prepTimeMinutes)} دقیقه</span>
+                        <span>{fa(avail)} موجود</span>
                       </div>
                     </div>
 
@@ -438,8 +476,9 @@ function MenuStep({
                       type="text"
                       value={line.specialInstructions}
                       onChange={(e) => onInstructions(m.menuItemId, e.target.value)}
-                      placeholder="Special instructions (optional)"
-                      className="mt-2 w-full rounded border px-2 py-1.5 text-xs"
+                      placeholder="توضیحات ویژه (اختیاری)"
+                      aria-label={`توضیحات ویژه برای ${m.name}`}
+                      className={`${inputClass} mt-2.5`}
                     />
                   )}
                 </li>
@@ -466,26 +505,37 @@ function QuantityStepper({
   if (value === 0) {
     return (
       <button
+        type="button"
         onClick={onAdd}
         disabled={disabled}
-        className="shrink-0 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+        className="shrink-0 rounded-lg border border-[#234B3B] bg-white px-3.5 py-1.5 text-sm font-medium text-[#234B3B] transition-colors duration-150 hover:bg-[#234B3B] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40 disabled:cursor-not-allowed disabled:border-[#E5E9E5] disabled:text-[#737B75] disabled:hover:bg-white disabled:hover:text-[#737B75]"
       >
-        Add
+        افزودن
       </button>
     );
   }
   return (
-    <div className="flex shrink-0 items-center rounded-md border">
+    // dir="ltr" keeps − on the left and + on the right, as users expect
+    <div
+      dir="ltr"
+      className="flex shrink-0 items-center overflow-hidden rounded-lg border border-[#E5E9E5]"
+    >
       <button
+        type="button"
         onClick={onRemove}
-        className="px-3 py-1.5 text-base leading-none hover:bg-zinc-50"
+        aria-label="کم کردن"
+        className="px-3 py-1.5 text-base leading-none text-[#252B28] transition-colors duration-150 hover:bg-[#F7F5EF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#234B3B]/40"
       >
         −
       </button>
-      <span className="w-8 text-center text-sm font-medium tabular-nums">{value}</span>
+      <span className="w-8 text-center text-sm font-semibold tabular-nums text-[#252B28]">
+        {fa(value)}
+      </span>
       <button
+        type="button"
         onClick={onAdd}
-        className="px-3 py-1.5 text-base leading-none hover:bg-zinc-50"
+        aria-label="افزودن"
+        className="px-3 py-1.5 text-base leading-none text-[#252B28] transition-colors duration-150 hover:bg-[#F7F5EF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#234B3B]/40"
       >
         +
       </button>
@@ -523,21 +573,23 @@ function ReviewStep({
   return (
     <div className="space-y-6">
       {previewReadyAt && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-          <span className="font-medium">Estimated ready</span> at{' '}
-          {formatTime(previewReadyAt)} ({minutesFromNow(previewReadyAt)} min from now)
+        <div className="rounded-xl border border-[#27845A]/30 bg-[#27845A]/10 p-3 text-sm text-[#252B28]">
+          <span className="font-semibold text-[#27845A]">زمان تقریبی آماده شدن:</span>{' '}
+          {formatTime(previewReadyAt)} ({fa(minutesFromNow(previewReadyAt))} دقیقه دیگر)
         </div>
       )}
 
       {blockedLines.length > 0 && (
-        <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-          <div className="font-medium">Some items are no longer available:</div>
-          <ul className="mt-1 list-disc pl-5">
+        <div
+          role="alert"
+          className="rounded-xl border border-[#D99A32]/50 bg-[#D99A32]/10 p-3 text-sm text-[#252B28]"
+        >
+          <div className="font-semibold">موجودی برخی آیتم‌ها کافی نیست:</div>
+          <ul className="mt-1.5 list-disc space-y-1 ps-5 leading-6">
             {blockedLines.map((l) => (
               <li key={l.menuItemId}>
-                {menuById.get(l.menuItemId)?.name} — only{' '}
-                {menuById.get(l.menuItemId) ? 'fewer' : '0'} left. Reduce quantity
-                or remove to continue.
+                {menuById.get(l.menuItemId)?.name} ـ تعداد انتخاب‌شده از موجودی فعلی بیشتر
+                است. تعداد را کم کنید یا آیتم را حذف کنید.
               </li>
             ))}
           </ul>
@@ -545,75 +597,78 @@ function ReviewStep({
       )}
 
       {submitError && (
-        <div className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm text-rose-800">
+        <div
+          role="alert"
+          className="rounded-xl border border-[#D9534F]/30 bg-[#D9534F]/10 p-3 text-sm leading-6 text-[#D9534F]"
+        >
           {submitError}
         </div>
       )}
 
       {existingOrder && existingOrder.items.length > 0 && (
         <section>
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            Already on order
-          </h2>
-          <ul className="space-y-1.5 rounded-lg border bg-zinc-50 p-3 text-sm">
+          <h2 className={sectionTitle}>قبلاً در سفارش ثبت شده</h2>
+          <ul className="space-y-1.5 rounded-xl border border-[#E5E9E5] bg-[#F7F5EF] p-3.5 text-sm text-[#252B28]">
             {existingOrder.items.map((i) => (
-              <li key={i.id} className="flex justify-between">
+              <li key={i.id} className="flex justify-between gap-3">
                 <span>
-                  {i.quantity}× {i.name}{' '}
-                  <span className="text-xs text-zinc-500">({i.status})</span>
+                  {fa(i.quantity)} عدد {i.name}{' '}
+                  <span className="text-xs text-[#737B75]">
+                    ({itemStatusLabel[i.status] ?? i.status})
+                  </span>
                 </span>
-                <span className="tabular-nums text-zinc-600">
-                  {(i.unitPriceToman * i.quantity).toLocaleString('fa-IR')}
+                <span className="tabular-nums text-[#737B75]">
+                  {fa(i.unitPriceToman * i.quantity)}
                 </span>
               </li>
             ))}
-            <li className="flex justify-between border-t pt-1.5 text-zinc-600">
-              <span>Subtotal (existing)</span>
-              <span className="tabular-nums">{existingTotal.toLocaleString('fa-IR')}</span>
+            <li className="flex justify-between border-t border-[#E5E9E5] pt-2 text-[#737B75]">
+              <span>جمع آیتم‌های قبلی</span>
+              <span className="tabular-nums">{fa(existingTotal)}</span>
             </li>
           </ul>
         </section>
       )}
 
       <section>
-        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
-          New items
-        </h2>
+        <h2 className={sectionTitle}>آیتم‌های جدید</h2>
         <ul className="space-y-3">
           {cart.map((line) => {
             const item = menuById.get(line.menuItemId);
             if (!item) return null;
             return (
-              <li key={line.menuItemId} className="rounded-lg border bg-white p-3">
-                <div className="flex justify-between text-sm">
+              <li
+                key={line.menuItemId}
+                className="rounded-xl border border-[#E5E9E5] bg-white p-3.5 shadow-sm"
+              >
+                <div className="flex justify-between gap-3 text-sm text-[#252B28]">
                   <span className="font-medium">
-                    {line.quantity}× {item.name}
+                    {fa(line.quantity)} عدد {item.name}
                   </span>
                   <span className="tabular-nums">
-                    {(item.priceToman * line.quantity).toLocaleString('fa-IR')}
+                    {fa(item.priceToman * line.quantity)}
                   </span>
                 </div>
                 <input
                   type="text"
                   value={line.specialInstructions}
                   onChange={(e) => onEditInstructions(line.menuItemId, e.target.value)}
-                  placeholder="Special instructions"
-                  className="mt-2 w-full rounded border px-2 py-1 text-xs"
+                  placeholder="توضیحات ویژه"
+                  aria-label={`توضیحات ویژه برای ${item.name}`}
+                  className={`${inputClass} mt-2.5`}
                 />
               </li>
             );
           })}
         </ul>
-        <div className="mt-3 flex justify-between rounded-lg border-t-2 border-zinc-900 pt-2 text-sm font-semibold">
-          <span>Subtotal (new)</span>
-          <span className="tabular-nums">{newTotal.toLocaleString('fa-IR')}</span>
+        <div className="mt-3 flex justify-between border-t-2 border-[#234B3B] pt-2.5 text-sm font-bold text-[#252B28]">
+          <span>جمع آیتم‌های جدید</span>
+          <span className="tabular-nums">{fa(newTotal)}</span>
         </div>
         {existingOrder && (
-          <div className="mt-1 flex justify-between text-sm text-zinc-600">
-            <span>Order total after submit</span>
-            <span className="tabular-nums">
-              {(existingTotal + newTotal).toLocaleString('fa-IR')}
-            </span>
+          <div className="mt-1.5 flex justify-between text-sm text-[#737B75]">
+            <span>جمع کل سفارش پس از ثبت</span>
+            <span className="tabular-nums">{fa(existingTotal + newTotal)}</span>
           </div>
         )}
       </section>
@@ -627,19 +682,23 @@ function ReviewStep({
 
 function prepGroupLabel(group: string): string {
   const labels: Record<string, string> = {
-    grill: 'Grill',
-    fryer: 'Fryer',
-    stew_rice: 'Stews & Rice',
-    cold: 'Cold',
-    beverage: 'Beverages',
-    other: 'Other',
+    grill: 'گریل',
+    fryer: 'سرخ‌کن',
+    stew_rice: 'خورش و برنج',
+    cold: 'سرد',
+    beverage: 'نوشیدنی',
+    other: 'سایر',
   };
   return labels[group] ?? group;
 }
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString('fa-IR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Tehran',
+  });
 }
 
 function minutesFromNow(iso: string): number {

@@ -46,16 +46,24 @@ async function loadTables(restaurantId: string, branchId: string): Promise<Table
   return rows as TableCard[];
 }
 
+const fa = (n: number) => n.toLocaleString('fa-IR');
+
+const tableStatusLabel: Record<string, string> = {
+  available: 'آزاد',
+  occupied: 'اشغال',
+  reserved: 'رزرو شده',
+};
+
 const statusStyle: Record<string, string> = {
-  available: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  occupied: 'bg-amber-50 text-amber-700 border-amber-200',
-  reserved: 'bg-sky-50 text-sky-700 border-sky-200',
+  available: 'border-[#27845A]/30 bg-[#27845A]/10 text-[#27845A]',
+  occupied: 'border-[#D99A32]/40 bg-[#D99A32]/10 text-[#252B28]',
+  reserved: 'border-[#4F7FA5]/30 bg-[#4F7FA5]/10 text-[#4F7FA5]',
 };
 
 const orderStatusLabel: Record<string, string> = {
-  confirmed: 'Confirmed',
-  preparing: 'Preparing',
-  ready: 'Ready to serve',
+  confirmed: 'تأیید شده',
+  preparing: 'در حال آماده‌سازی',
+  ready: 'آماده سرو',
 };
 
 export default async function WaiterDashboard() {
@@ -63,14 +71,14 @@ export default async function WaiterDashboard() {
   const rows = await loadTables(user.restaurantId, user.branchId!);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-4 pb-24">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Tables</h1>
+    <div className="mx-auto max-w-4xl space-y-6 p-4 pb-24 sm:p-6 sm:pb-24">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-xl font-bold text-[#252B28]">میزها</h1>
         <Link
           href="/waiter/orders/new"
-          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800"
+          className="rounded-lg bg-[#234B3B] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-[#193A2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B] focus-visible:ring-offset-2"
         >
-          + New order
+          + سفارش جدید
         </Link>
       </div>
 
@@ -85,36 +93,38 @@ export default async function WaiterDashboard() {
             <Link
               key={t.id}
               href={href}
-              className={`flex flex-col gap-2 rounded-lg border bg-white p-3 shadow-sm transition hover:shadow-md ${
-                active ? 'ring-2 ring-amber-300' : ''
+              className={`flex flex-col gap-2 rounded-xl border bg-white p-3.5 shadow-sm transition-shadow duration-150 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/50 ${
+                active ? 'border-[#D99A32] ring-1 ring-[#D99A32]/60' : 'border-[#E5E9E5]'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold">{t.label}</span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-lg font-bold text-[#252B28]">{t.label}</span>
                 <span
-                  className={`rounded border px-2 py-0.5 text-[11px] ${
-                    statusStyle[t.status] ?? 'bg-zinc-100 text-zinc-600'
+                  className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${
+                    statusStyle[t.status] ?? 'border-[#E5E9E5] bg-[#F8F9F6] text-[#737B75]'
                   }`}
                 >
-                  {t.status}
+                  {tableStatusLabel[t.status] ?? t.status}
                 </span>
               </div>
-              <span className="text-xs text-zinc-500">{t.seats} seats</span>
+              <span className="text-xs text-[#737B75]">{fa(t.seats)} صندلی</span>
 
               {active ? (
-                <div className="mt-1 space-y-1 border-t pt-2">
-                  <div className="text-xs font-medium text-amber-700">
-                    {orderStatusLabel[t.activeOrderStatus ?? ''] ?? 'In progress'}
+                <div className="mt-1 space-y-1 border-t border-[#E5E9E5] pt-2">
+                  <div className="text-xs font-semibold text-[#C87952]">
+                    {orderStatusLabel[t.activeOrderStatus ?? ''] ?? 'در جریان'}
                   </div>
                   {t.estimatedReadyAt && (
-                    <div className="text-[11px] text-zinc-500">
-                      Ready ~{formatTime(t.estimatedReadyAt)}
+                    <div className="text-[11px] text-[#737B75]">
+                      آماده تا حدود {formatTime(t.estimatedReadyAt)}
                     </div>
                   )}
-                  <div className="text-xs text-zinc-600 underline">View order →</div>
+                  <div className="text-xs font-medium text-[#234B3B] underline underline-offset-2">
+                    مشاهده سفارش
+                  </div>
                 </div>
               ) : (
-                <div className="mt-1 text-xs text-zinc-500">Tap to start order →</div>
+                <div className="mt-1 text-xs text-[#737B75]">برای ثبت سفارش بزنید</div>
               )}
             </Link>
           );
@@ -122,8 +132,8 @@ export default async function WaiterDashboard() {
       </div>
 
       {rows.length === 0 && (
-        <div className="rounded-lg border border-dashed p-8 text-center text-sm text-zinc-500">
-          No tables configured.
+        <div className="rounded-xl border border-dashed border-[#E5E9E5] bg-white p-10 text-center text-sm text-[#737B75]">
+          هنوز میزی تعریف نشده است.
         </div>
       )}
     </div>
@@ -132,5 +142,9 @@ export default async function WaiterDashboard() {
 
 function formatTime(d: Date | string): string {
   const date = typeof d === 'string' ? new Date(d) : d;
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString('fa-IR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Tehran',
+  });
 }
