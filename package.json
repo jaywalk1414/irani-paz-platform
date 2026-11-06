@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "eslint",
     "db:studio": "drizzle-kit studio",
@@ -17,6 +19,7 @@
     "@neon/config": "^1.11.3",
     "@neon/env": "^1.6.15",
     "@neondatabase/serverless": "^1.2.0",
+    "@opennextjs/cloudflare": "^1.20.16",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.4",
     "next": "16.4.5",
@@ -39,6 +42,7 @@
     "eslint-config-next": "16.4.5",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.86.0"
   }
 }
