@@ -1,14 +1,18 @@
-"use server";
+'use server';
 
-import { cookies } from "next/headers";
-import { signOut } from "../../../auth";
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { signOut } from '../../../auth';
 
 export async function logout() {
-  const cookieStore = await cookies();
-  const existing = cookieStore.getAll();
+  await signOut({ redirect: false });
 
-  for (const { name } of existing) {
-    cookieStore.delete(name);
+  const cookieStore = await cookies(); 
+  const existingCookies = cookieStore.getAll(); 
+
+  for (const { name } of existingCookies) {
+    cookieStore.set(name, '', { maxAge: 0 });
   }
-  await signOut({ redirectTo: "/login" });
+
+  redirect('/login');
 }
