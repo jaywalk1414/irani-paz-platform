@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import { authConfig } from '../auth.config';
 import { NextResponse } from 'next/server';
+import type { NextFetchEvent, NextRequest } from 'next/server';
 
 const { auth } = NextAuth(() => ({
   ...authConfig,
@@ -8,7 +9,7 @@ const { auth } = NextAuth(() => ({
   trustHost: true,
 }));
 
-export default auth((req) => {
+const authMiddleware = auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
@@ -28,6 +29,14 @@ export default auth((req) => {
 
   return NextResponse.next();
 });
+
+export default async function middleware(req: NextRequest, event: NextFetchEvent) {
+  const handler = (await authMiddleware) as unknown as (
+    req: NextRequest,
+    event: NextFetchEvent,
+  ) => Promise<Response> | Response;
+  return handler(req, event);
+}
 
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|svg)$).*)'],
