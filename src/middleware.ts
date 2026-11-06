@@ -6,6 +6,10 @@ import type { NextFetchEvent, NextRequest } from "next/server";
 const { auth } = NextAuth(authConfig);
 
 const authMiddleware = auth((req) => {
+  console.log("[AUTH MIDDLEWARE]", {
+    hasSecret: Boolean(process.env.AUTH_SECRET),
+  });
+
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
