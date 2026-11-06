@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { logout } from '@/app/(app)/actions';
-import { auth } from '../../../../auth';
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { logout } from "@/app/(app)/actions";
+import { auth } from "../../../../auth";
 
 export default async function WaiterLayout({
   children,
@@ -9,8 +9,8 @@ export default async function WaiterLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (session.user.role !== 'waiter') redirect('/after-login');
+  if (!session?.user) redirect("/login");
+  if (session.user.role !== "waiter") redirect("/after-login");
 
   return (
     <div className="flex min-h-screen flex-col bg-[#F8F9F6]">

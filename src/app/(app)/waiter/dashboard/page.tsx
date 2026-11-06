@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import { and, eq, sql } from 'drizzle-orm';
-import { requireRole } from '@/lib/auth/require';
-import { db } from '@/lib/db/client';
-import { tables } from '@/lib/db/schema';
+import Link from "next/link";
+import { and, eq, sql } from "drizzle-orm";
+import { requireRole } from "@/lib/auth/require";
+import { db } from "@/lib/db/client";
+import { tables } from "@/lib/db/schema";
 
 interface TableCard {
   id: string;
@@ -14,7 +14,10 @@ interface TableCard {
   estimatedReadyAt: Date | null;
 }
 
-async function loadTables(restaurantId: string, branchId: string): Promise<TableCard[]> {
+async function loadTables(
+  restaurantId: string,
+  branchId: string,
+): Promise<TableCard[]> {
   const rows = await db
     .select({
       id: tables.id,
@@ -41,33 +44,35 @@ async function loadTables(restaurantId: string, branchId: string): Promise<Table
       )`,
     })
     .from(tables)
-    .where(and(eq(tables.restaurantId, restaurantId), eq(tables.branchId, branchId)))
+    .where(
+      and(eq(tables.restaurantId, restaurantId), eq(tables.branchId, branchId)),
+    )
     .orderBy(tables.label);
   return rows as TableCard[];
 }
 
-const fa = (n: number) => n.toLocaleString('fa-IR');
+const fa = (n: number) => n.toLocaleString("fa-IR");
 
 const tableStatusLabel: Record<string, string> = {
-  available: 'آزاد',
-  occupied: 'اشغال',
-  reserved: 'رزرو شده',
+  available: "آزاد",
+  occupied: "اشغال",
+  reserved: "رزرو شده",
 };
 
 const statusStyle: Record<string, string> = {
-  available: 'border-[#27845A]/30 bg-[#27845A]/10 text-[#27845A]',
-  occupied: 'border-[#D99A32]/40 bg-[#D99A32]/10 text-[#252B28]',
-  reserved: 'border-[#4F7FA5]/30 bg-[#4F7FA5]/10 text-[#4F7FA5]',
+  available: "border-[#27845A]/30 bg-[#27845A]/10 text-[#27845A]",
+  occupied: "border-[#D99A32]/40 bg-[#D99A32]/10 text-[#252B28]",
+  reserved: "border-[#4F7FA5]/30 bg-[#4F7FA5]/10 text-[#4F7FA5]",
 };
 
 const orderStatusLabel: Record<string, string> = {
-  confirmed: 'تأیید شده',
-  preparing: 'در حال آماده‌سازی',
-  ready: 'آماده سرو',
+  confirmed: "تأیید شده",
+  preparing: "در حال آماده‌سازی",
+  ready: "آماده سرو",
 };
 
 export default async function WaiterDashboard() {
-  const user = await requireRole(['waiter']);
+  const user = await requireRole(["waiter"]);
   const rows = await loadTables(user.restaurantId, user.branchId!);
 
   return (
@@ -94,25 +99,32 @@ export default async function WaiterDashboard() {
               key={t.id}
               href={href}
               className={`flex flex-col gap-2 rounded-xl border bg-white p-3.5 shadow-sm transition-shadow duration-150 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/50 ${
-                active ? 'border-[#D99A32] ring-1 ring-[#D99A32]/60' : 'border-[#E5E9E5]'
+                active
+                  ? "border-[#D99A32] ring-1 ring-[#D99A32]/60"
+                  : "border-[#E5E9E5]"
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-lg font-bold text-[#252B28]">{t.label}</span>
+                <span className="text-lg font-bold text-[#252B28]">
+                  {t.label}
+                </span>
                 <span
                   className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${
-                    statusStyle[t.status] ?? 'border-[#E5E9E5] bg-[#F8F9F6] text-[#737B75]'
+                    statusStyle[t.status] ??
+                    "border-[#E5E9E5] bg-[#F8F9F6] text-[#737B75]"
                   }`}
                 >
                   {tableStatusLabel[t.status] ?? t.status}
                 </span>
               </div>
-              <span className="text-xs text-[#737B75]">{fa(t.seats)} صندلی</span>
+              <span className="text-xs text-[#737B75]">
+                {fa(t.seats)} صندلی
+              </span>
 
               {active ? (
                 <div className="mt-1 space-y-1 border-t border-[#E5E9E5] pt-2">
                   <div className="text-xs font-semibold text-[#C87952]">
-                    {orderStatusLabel[t.activeOrderStatus ?? ''] ?? 'در جریان'}
+                    {orderStatusLabel[t.activeOrderStatus ?? ""] ?? "در جریان"}
                   </div>
                   {t.estimatedReadyAt && (
                     <div className="text-[11px] text-[#737B75]">
@@ -124,7 +136,9 @@ export default async function WaiterDashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="mt-1 text-xs text-[#737B75]">برای ثبت سفارش بزنید</div>
+                <div className="mt-1 text-xs text-[#737B75]">
+                  برای ثبت سفارش بزنید
+                </div>
               )}
             </Link>
           );
@@ -141,10 +155,10 @@ export default async function WaiterDashboard() {
 }
 
 function formatTime(d: Date | string): string {
-  const date = typeof d === 'string' ? new Date(d) : d;
-  return date.toLocaleTimeString('fa-IR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Asia/Tehran',
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleTimeString("fa-IR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Tehran",
   });
 }

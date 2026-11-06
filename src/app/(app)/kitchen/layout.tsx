@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { logout } from '@/app/(app)/actions';
-import { auth } from '../../../../auth';
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { logout } from "@/app/(app)/actions";
+import { auth } from "../../../../auth";
 
 export default async function KitchenLayout({
   children,
@@ -9,9 +9,9 @@ export default async function KitchenLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-  if (!session?.user) redirect('/login');
-  if (session.user.role !== 'kitchen' && session.user.role !== 'owner') {
-    redirect('/after-login');
+  if (!session?.user) redirect("/login");
+  if (session.user.role !== "kitchen" && session.user.role !== "owner") {
+    redirect("/after-login");
   }
 
   return (

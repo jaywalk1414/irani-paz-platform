@@ -1,38 +1,41 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   KitchenItemPayload,
   KitchenOrderPayload,
-} from '@/app/api/kitchen/orders/route';
-import {
-  startItemAction,
-  readyItemAction,
-  cancelItemAction,
-} from './actions';
+} from "@/app/api/kitchen/orders/route";
+import { startItemAction, readyItemAction, cancelItemAction } from "./actions";
 
 export type { KitchenItemPayload, KitchenOrderPayload };
 
 const POLL_MS = 5000;
 
-const fa = (n: number) => n.toLocaleString('fa-IR');
+const fa = (n: number) => n.toLocaleString("fa-IR");
 const fa1 = (n: number) =>
-  n.toLocaleString('fa-IR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  n.toLocaleString("fa-IR", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
 
 const orderStatusLabel: Record<string, string> = {
-  pending: 'در انتظار',
-  confirmed: 'تأیید شده',
-  preparing: 'در حال آماده‌سازی',
-  ready: 'آماده',
+  pending: "در انتظار",
+  confirmed: "تأیید شده",
+  preparing: "در حال آماده‌سازی",
+  ready: "آماده",
 };
 
 const secondaryBtn =
-  'rounded-lg border border-[#E5E9E5] bg-white px-3 py-1.5 text-xs font-medium text-[#252B28] ' +
-  'transition-colors duration-150 hover:border-[#234B3B] hover:text-[#234B3B] ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40 ' +
-  'disabled:cursor-not-allowed disabled:opacity-50';
+  "rounded-lg border border-[#E5E9E5] bg-white px-3 py-1.5 text-xs font-medium text-[#252B28] " +
+  "transition-colors duration-150 hover:border-[#234B3B] hover:text-[#234B3B] " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40 " +
+  "disabled:cursor-not-allowed disabled:opacity-50";
 
-export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPayload[] }) {
+export function KitchenBoard({
+  initialOrders,
+}: {
+  initialOrders: KitchenOrderPayload[];
+}) {
   const [orders, setOrders] = useState<KitchenOrderPayload[]>(initialOrders);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [nowTick, setNowTick] = useState(0);
@@ -43,8 +46,10 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
     itemId: string;
     name: string;
   } | null>(null);
-  const [cancelReason, setCancelReason] = useState('');
-  const knownOrderIds = useRef<Set<string>>(new Set(initialOrders.map((o) => o.id)));
+  const [cancelReason, setCancelReason] = useState("");
+  const knownOrderIds = useRef<Set<string>>(
+    new Set(initialOrders.map((o) => o.id)),
+  );
 
   // 1s tick so pending minutes update between polls.
   // First value arrives on the first interval tick (no setState in effect body).
@@ -59,7 +64,7 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
 
     const poll = async () => {
       try {
-        const res = await fetch('/api/kitchen/orders', { cache: 'no-store' });
+        const res = await fetch("/api/kitchen/orders", { cache: "no-store" });
         if (!res.ok) return;
         const data = (await res.json()) as { orders: KitchenOrderPayload[] };
         if (stopped) return;
@@ -80,7 +85,7 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
 
   const refreshNow = async () => {
     try {
-      const res = await fetch('/api/kitchen/orders', { cache: 'no-store' });
+      const res = await fetch("/api/kitchen/orders", { cache: "no-store" });
       if (!res.ok) return;
       const data = (await res.json()) as { orders: KitchenOrderPayload[] };
       setOrders(data.orders);
@@ -94,10 +99,10 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
     const items = orders.flatMap((o) => o.items);
     return {
       orders: orders.length,
-      pending: items.filter((i) => i.status === 'pending').length,
-      preparing: items.filter((i) => i.status === 'preparing').length,
-      ready: items.filter((i) => i.status === 'ready').length,
-      late: items.filter((i) => i.urgency === 'late').length,
+      pending: items.filter((i) => i.status === "pending").length,
+      preparing: items.filter((i) => i.status === "preparing").length,
+      ready: items.filter((i) => i.status === "ready").length,
+      late: items.filter((i) => i.urgency === "late").length,
     };
   }, [orders]);
 
@@ -110,7 +115,7 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
     try {
       const result = await action();
       if (!result.ok) {
-        setError(result.error ?? 'انجام نشد.');
+        setError(result.error ?? "انجام نشد.");
       }
     } finally {
       setBusyItems((b) => {
@@ -129,7 +134,7 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
     await runItemAction(target.itemId, () =>
       cancelItemAction(target.itemId, cancelReason.trim() || null),
     );
-    setCancelReason('');
+    setCancelReason("");
   }
 
   return (
@@ -139,21 +144,27 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
           <Stat label="سفارش‌ها" value={totals.orders} />
           <Stat label="در انتظار" value={totals.pending} tone="neutral" />
-          <Stat label="در حال آماده‌سازی" value={totals.preparing} tone="amber" />
+          <Stat
+            label="در حال آماده‌سازی"
+            value={totals.preparing}
+            tone="amber"
+          />
           <Stat label="آماده" value={totals.ready} tone="emerald" />
-          {totals.late > 0 && <Stat label="با تأخیر" value={totals.late} tone="rose" />}
+          {totals.late > 0 && (
+            <Stat label="با تأخیر" value={totals.late} tone="rose" />
+          )}
         </div>
         <div className="flex items-center gap-3 text-xs text-[#737B75]">
           <span>
-            به‌روزرسانی:{' '}
+            به‌روزرسانی:{" "}
             {lastUpdated
-              ? lastUpdated.toLocaleTimeString('fa-IR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  timeZone: 'Asia/Tehran',
+              ? lastUpdated.toLocaleTimeString("fa-IR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  timeZone: "Asia/Tehran",
                 })
-              : '—'}
+              : "—"}
           </span>
           <button type="button" onClick={refreshNow} className={secondaryBtn}>
             بازخوانی
@@ -179,7 +190,8 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
 
       {orders.length === 0 && (
         <div className="rounded-xl border border-dashed border-[#E5E9E5] bg-white p-12 text-center text-sm leading-7 text-[#737B75]">
-          سفارش فعالی وجود ندارد. سفارش‌هایی که پیشخدمت‌ها ثبت کنند همین‌جا نمایش داده می‌شوند.
+          سفارش فعالی وجود ندارد. سفارش‌هایی که پیشخدمت‌ها ثبت کنند همین‌جا
+          نمایش داده می‌شوند.
         </div>
       )}
 
@@ -213,7 +225,10 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
             className="w-full max-w-sm space-y-4 rounded-xl border border-[#E5E9E5] bg-white p-5 shadow-xl"
           >
             <div className="space-y-0.5">
-              <div id="cancel-dialog-title" className="text-sm font-bold text-[#252B28]">
+              <div
+                id="cancel-dialog-title"
+                className="text-sm font-bold text-[#252B28]"
+              >
                 لغو آیتم
               </div>
               <div className="text-xs text-[#737B75]">{cancelTarget.name}</div>
@@ -231,7 +246,7 @@ export function KitchenBoard({ initialOrders }: { initialOrders: KitchenOrderPay
                 type="button"
                 onClick={() => {
                   setCancelTarget(null);
-                  setCancelReason('');
+                  setCancelReason("");
                 }}
                 className="rounded-lg border border-[#E5E9E5] bg-white px-4 py-2 text-sm font-medium text-[#252B28] transition-colors duration-150 hover:bg-[#F7F5EF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40"
               >
@@ -272,9 +287,9 @@ function OrderCard({
   onCancel: (itemId: string, name: string) => void;
 }) {
   const allReady = order.items.every(
-    (i) => i.status === 'ready' || i.status === 'cancelled',
+    (i) => i.status === "ready" || i.status === "cancelled",
   );
-  const anyLate = order.items.some((i) => i.urgency === 'late');
+  const anyLate = order.items.some((i) => i.urgency === "late");
   const ageMinutes: number | null =
     nowTick === 0
       ? null
@@ -289,17 +304,20 @@ function OrderCard({
     <div
       className={`flex flex-col rounded-xl border bg-white shadow-sm ${
         anyLate
-          ? 'border-[#D9534F]'
+          ? "border-[#D9534F]"
           : allReady
-            ? 'border-[#27845A]'
-            : 'border-[#E5E9E5]'
+            ? "border-[#27845A]"
+            : "border-[#E5E9E5]"
       }`}
     >
       <header className="flex items-start justify-between gap-2 border-b border-[#E5E9E5] p-3.5">
         <div>
-          <div className="text-lg font-bold text-[#252B28]">{order.tableLabel}</div>
+          <div className="text-lg font-bold text-[#252B28]">
+            {order.tableLabel}
+          </div>
           <div className="text-xs text-[#737B75]">
-            {fa(order.items.filter((i) => i.status !== 'cancelled').length)} آیتم
+            {fa(order.items.filter((i) => i.status !== "cancelled").length)}{" "}
+            آیتم
             {ageMinutes !== null && ` ـ ${fa1(ageMinutes)} دقیقه پیش`}
           </div>
         </div>
@@ -307,11 +325,11 @@ function OrderCard({
           <StatusPill status={order.status} allReady={allReady} />
           {order.estimatedReadyAt && (
             <div className="mt-1 text-[11px] text-[#737B75]">
-              تخمین:{' '}
-              {new Date(order.estimatedReadyAt).toLocaleTimeString('fa-IR', {
-                hour: '2-digit',
-                minute: '2-digit',
-                timeZone: 'Asia/Tehran',
+              تخمین:{" "}
+              {new Date(order.estimatedReadyAt).toLocaleTimeString("fa-IR", {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: "Asia/Tehran",
               })}
             </div>
           )}
@@ -353,9 +371,9 @@ function ItemRow({
 }) {
   const elapsedMinutes: number | null = item.elapsedMinutes;
   const overBy: number | null = item.overBy;
-  const urgency: 'fresh' | 'due' | 'late' | null = item.urgency;
+  const urgency: "fresh" | "due" | "late" | null = item.urgency;
 
-  const terminal = item.status === 'ready' || item.status === 'cancelled';
+  const terminal = item.status === "ready" || item.status === "cancelled";
 
   return (
     <li className="flex items-start gap-3 p-3.5">
@@ -380,15 +398,16 @@ function ItemRow({
         )}
 
         <div className="mt-1 text-[11px] leading-5 text-[#737B75]">
-          {item.status === 'pending' && elapsedMinutes !== null && (
+          {item.status === "pending" && elapsedMinutes !== null && (
             <>
-              در انتظار {fa1(elapsedMinutes)} دقیقه ـ زمان آماده‌سازی{' '}
+              در انتظار {fa1(elapsedMinutes)} دقیقه ـ زمان آماده‌سازی{" "}
               {fa(item.prepTimeMinutes)} دقیقه
             </>
           )}
-          {item.status === 'preparing' && elapsedMinutes !== null && (
+          {item.status === "preparing" && elapsedMinutes !== null && (
             <>
-              در حال آماده‌سازی {fa1(elapsedMinutes)} از {fa(item.prepTimeMinutes)} دقیقه
+              در حال آماده‌سازی {fa1(elapsedMinutes)} از{" "}
+              {fa(item.prepTimeMinutes)} دقیقه
               {overBy !== null && overBy > 0 && (
                 <span className="ms-1 font-medium text-[#D9534F]">
                   ({fa1(overBy)} دقیقه تأخیر)
@@ -396,10 +415,10 @@ function ItemRow({
               )}
             </>
           )}
-          {item.status === 'ready' && (
+          {item.status === "ready" && (
             <span className="font-medium text-[#27845A]">آماده</span>
           )}
-          {item.status === 'cancelled' && (
+          {item.status === "cancelled" && (
             <span className="font-medium text-[#D9534F]">لغو شده</span>
           )}
         </div>
@@ -407,24 +426,24 @@ function ItemRow({
 
       {!terminal && (
         <div className="flex shrink-0 flex-col gap-1.5">
-          {item.status === 'pending' && (
+          {item.status === "pending" && (
             <button
               type="button"
               onClick={onStart}
               disabled={busy}
               className="rounded-lg bg-[#D99A32] px-3.5 py-1.5 text-xs font-semibold text-[#252B28] transition-colors duration-150 hover:bg-[#C98B28] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D99A32] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {busy ? '…' : 'شروع'}
+              {busy ? "…" : "شروع"}
             </button>
           )}
-          {item.status === 'preparing' && (
+          {item.status === "preparing" && (
             <button
               type="button"
               onClick={onReady}
               disabled={busy}
               className="rounded-lg bg-[#27845A] px-3.5 py-1.5 text-xs font-semibold text-white transition-colors duration-150 hover:bg-[#1F6E4A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#27845A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {busy ? '…' : 'آماده شد'}
+              {busy ? "…" : "آماده شد"}
             </button>
           )}
           <button
@@ -448,22 +467,27 @@ function ItemRow({
 function Stat({
   label,
   value,
-  tone = 'neutral',
+  tone = "neutral",
 }: {
   label: string;
   value: number;
-  tone?: 'neutral' | 'amber' | 'emerald' | 'rose';
+  tone?: "neutral" | "amber" | "emerald" | "rose";
 }) {
   const dotClass: Record<string, string> = {
-    neutral: 'bg-[#737B75]',
-    amber: 'bg-[#D99A32]',
-    emerald: 'bg-[#27845A]',
-    rose: 'bg-[#D9534F]',
+    neutral: "bg-[#737B75]",
+    amber: "bg-[#D99A32]",
+    emerald: "bg-[#27845A]",
+    rose: "bg-[#D9534F]",
   };
   return (
     <div className="flex items-center gap-2">
-      <span className={`h-2 w-2 rounded-full ${dotClass[tone]}`} aria-hidden="true" />
-      <span className="text-lg font-bold tabular-nums text-[#252B28]">{fa(value)}</span>
+      <span
+        className={`h-2 w-2 rounded-full ${dotClass[tone]}`}
+        aria-hidden="true"
+      />
+      <span className="text-lg font-bold tabular-nums text-[#252B28]">
+        {fa(value)}
+      </span>
       <span className="text-xs text-[#737B75]">{label}</span>
     </div>
   );
@@ -476,12 +500,12 @@ function StatusPill({
   status: string;
   allReady: boolean;
 }) {
-  const key = allReady ? 'ready' : status;
+  const key = allReady ? "ready" : status;
   const cls = allReady
-    ? 'border-[#27845A]/30 bg-[#27845A]/10 text-[#27845A]'
-    : status === 'preparing'
-      ? 'border-[#D99A32]/40 bg-[#D99A32]/10 text-[#252B28]'
-      : 'border-[#E5E9E5] bg-[#F8F9F6] text-[#737B75]';
+    ? "border-[#27845A]/30 bg-[#27845A]/10 text-[#27845A]"
+    : status === "preparing"
+      ? "border-[#D99A32]/40 bg-[#D99A32]/10 text-[#252B28]"
+      : "border-[#E5E9E5] bg-[#F8F9F6] text-[#737B75]";
   return (
     <span
       className={`inline-block rounded-md border px-2 py-0.5 text-[11px] font-medium ${cls}`}
@@ -492,24 +516,25 @@ function StatusPill({
 }
 
 function urgencyDot(
-  urgency: 'fresh' | 'due' | 'late' | null,
-  status: KitchenItemPayload['status'],
+  urgency: "fresh" | "due" | "late" | null,
+  status: KitchenItemPayload["status"],
 ): string {
-  if (status === 'ready') return 'bg-[#27845A]';
-  if (status === 'cancelled') return 'bg-[#D9534F]';
-  if (urgency === 'late') return 'bg-[#D9534F] animate-pulse motion-reduce:animate-none';
-  if (urgency === 'due') return 'bg-[#D99A32]';
-  return 'bg-[#27845A]';
+  if (status === "ready") return "bg-[#27845A]";
+  if (status === "cancelled") return "bg-[#D9534F]";
+  if (urgency === "late")
+    return "bg-[#D9534F] animate-pulse motion-reduce:animate-none";
+  if (urgency === "due") return "bg-[#D99A32]";
+  return "bg-[#27845A]";
 }
 
 function prepGroupLabel(group: string): string {
   const labels: Record<string, string> = {
-    grill: 'گریل',
-    fryer: 'سرخ‌کن',
-    stew_rice: 'خورش و برنج',
-    cold: 'سرد',
-    beverage: 'نوشیدنی',
-    other: 'سایر',
+    grill: "گریل",
+    fryer: "سرخ‌کن",
+    stew_rice: "خورش و برنج",
+    cold: "سرد",
+    beverage: "نوشیدنی",
+    other: "سایر",
   };
   return labels[group] ?? group;
 }
