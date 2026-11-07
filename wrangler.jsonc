@@ -25,6 +25,7 @@
     {
       "binding": "HYPERDRIVE",
       "id": "938a1bd5d8ad4ed1942bcc9e9b8f94da",
+      "localConnectionString": "postgresql://user:pass@localhost:5432/placeholder"
     }
   ]
 }
