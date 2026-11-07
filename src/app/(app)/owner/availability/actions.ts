@@ -1,23 +1,23 @@
-'use server';
+"use server";
 
-import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
-import { requireRole } from '@/lib/auth/require';
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { requireRole } from "@/lib/auth/require";
 import {
   adjustQuantity,
   getBusinessContext,
-} from '@/lib/services/availability.service';
+} from "@/lib/services/availability.service";
 import {
   AvailabilityConflictError,
   ConfiguredBelowReservedError,
-} from '@/lib/services/errors';
+} from "@/lib/services/errors";
 
 const adjustSchema = z.object({
   menuItemId: z.string().uuid(),
   deltaConfigured: z.coerce
     .number()
     .int()
-    .refine((v) => v !== 0, { message: 'Adjustment cannot be zero.' }),
+    .refine((v) => v !== 0, { message: "Adjustment cannot be zero." }),
   reason: z.string().max(500).optional(),
 });
 
@@ -30,15 +30,18 @@ export async function adjustAvailabilityAction(
   _prev: AdjustAvailabilityState,
   formData: FormData,
 ): Promise<AdjustAvailabilityState> {
-  const user = await requireRole(['owner']);
+  const user = await requireRole(["owner"]);
 
   const parsed = adjustSchema.safeParse({
-    menuItemId: formData.get('menuItemId'),
-    deltaConfigured: formData.get('deltaConfigured'),
-    reason: (formData.get('reason') as string) || undefined,
+    menuItemId: formData.get("menuItemId"),
+    deltaConfigured: formData.get("deltaConfigured"),
+    reason: (formData.get("reason") as string) || undefined,
   });
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? 'Invalid input.' };
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input.",
+    };
   }
 
   const ctx = await getBusinessContext(user.restaurantId);
@@ -53,10 +56,10 @@ export async function adjustAvailabilityAction(
       adjustedByUserId: user.id,
     });
 
-    revalidatePath('/owner/availability');
-    revalidatePath('/owner/dashboard');
-    revalidatePath('/waiter/dashboard');
-    revalidatePath('/kitchen/orders');
+    revalidatePath("/owner/availability");
+    revalidatePath("/owner/dashboard");
+    revalidatePath("/waiter/dashboard");
+    revalidatePath("/kitchen/orders");
 
     return {
       ok: true,

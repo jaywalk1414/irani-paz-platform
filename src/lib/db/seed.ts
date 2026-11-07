@@ -84,16 +84,8 @@ const MENU = [
   {
     key: "joojeh",
     name: "کباب جوجه",
-    description:
-      "کباب جوجه مرینیت‌شده با زعفران، همراه با برنج و گوجه کبابی.",
-    ingredients: [
-      "مرغ",
-      "زعفران",
-      "ماست",
-      "پیاز",
-      "برنج باسماتی",
-      "کره",
-    ],
+    description: "کباب جوجه مرینیت‌شده با زعفران، همراه با برنج و گوجه کبابی.",
+    ingredients: ["مرغ", "زعفران", "ماست", "پیاز", "برنج باسماتی", "کره"],
     priceToman: 220_000,
     prepTimeMinutes: 18,
     prepGroup: "grill" as const,
@@ -104,13 +96,7 @@ const MENU = [
     name: "کباب برگ",
     description:
       "کباب برگ فیله گوساله مرینیت‌شده با زعفران، همراه با برنج و کره.",
-    ingredients: [
-      "فیله گوساله",
-      "زعفران",
-      "برنج باسماتی",
-      "کره",
-      "گوجه کبابی",
-    ],
+    ingredients: ["فیله گوساله", "زعفران", "برنج باسماتی", "کره", "گوجه کبابی"],
     priceToman: 320_000,
     prepTimeMinutes: 15,
     prepGroup: "grill" as const,
@@ -670,8 +656,12 @@ async function main() {
   console.table(counts);
   console.log("\nDemo credentials (password for all):", DEMO_PASSWORD);
   console.log("  owner   → owner@demo.local   (نادیا احمدی)");
-  console.log("  waiter  → waiter@demo.local  (سارا کریمی — سفارش فعال روی میز ۳)");
-  console.log("  waiter2 → waiter2@demo.local (رضا جعفری — سفارش فعال روی میز ۵)");
+  console.log(
+    "  waiter  → waiter@demo.local  (سارا کریمی — سفارش فعال روی میز ۳)",
+  );
+  console.log(
+    "  waiter2 → waiter2@demo.local (رضا جعفری — سفارش فعال روی میز ۵)",
+  );
   console.log("  kitchen → kitchen@demo.local (حسین مرادی)");
   console.log(`\nBusiness date: ${businessDate}`);
 }

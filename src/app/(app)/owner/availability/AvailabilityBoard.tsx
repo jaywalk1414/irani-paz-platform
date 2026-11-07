@@ -1,21 +1,25 @@
-'use client';
+"use client";
 
-import { useActionState, useState } from 'react';
-import type { MenuItemAvailability } from '@/lib/services/availability.service';
+import { useActionState, useState } from "react";
+import type { MenuItemAvailability } from "@/lib/services/availability.service";
 import {
   adjustAvailabilityAction,
   type AdjustAvailabilityState,
-} from './actions';
+} from "./actions";
 
-const fa = (n: number) => n.toLocaleString('fa-IR');
+const fa = (n: number) => n.toLocaleString("fa-IR");
 
 const fieldClass =
-  'mt-1.5 block w-full rounded-lg border border-[#E5E9E5] bg-white px-3 py-2 text-sm text-[#252B28] ' +
-  'placeholder:text-[#737B75]/70 transition-colors duration-150 hover:border-[#737B75]/50 ' +
-  'focus:border-[#234B3B] focus:outline-none focus:ring-2 focus:ring-[#234B3B]/20';
+  "mt-1.5 block w-full rounded-lg border border-[#E5E9E5] bg-white px-3 py-2 text-sm text-[#252B28] " +
+  "placeholder:text-[#737B75]/70 transition-colors duration-150 hover:border-[#737B75]/50 " +
+  "focus:border-[#234B3B] focus:outline-none focus:ring-2 focus:ring-[#234B3B]/20";
 
-export function AvailabilityBoard({ items }: { items: MenuItemAvailability[] }) {
-  const [filter, setFilter] = useState('');
+export function AvailabilityBoard({
+  items,
+}: {
+  items: MenuItemAvailability[];
+}) {
+  const [filter, setFilter] = useState("");
 
   const filtered = items.filter((i) =>
     i.name.toLowerCase().includes(filter.trim().toLowerCase()),
@@ -53,8 +57,12 @@ function ItemCard({ item }: { item: MenuItemAvailability }) {
 
   const [expanded, setExpanded] = useState(false);
 
-  const available = state?.ok ? state.availableQuantity : item.availableQuantity;
-  const configured = state?.ok ? state.configuredQuantity : item.configuredQuantity;
+  const available = state?.ok
+    ? state.availableQuantity
+    : item.availableQuantity;
+  const configured = state?.ok
+    ? state.configuredQuantity
+    : item.configuredQuantity;
 
   return (
     <div className="rounded-xl border border-[#E5E9E5] bg-white p-4 shadow-sm">
@@ -68,10 +76,10 @@ function ItemCard({ item }: { item: MenuItemAvailability }) {
         <span
           className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${
             available === 0
-              ? 'border-[#D9534F]/30 bg-[#D9534F]/10 text-[#D9534F]'
+              ? "border-[#D9534F]/30 bg-[#D9534F]/10 text-[#D9534F]"
               : available <= 3
-                ? 'border-[#D99A32]/40 bg-[#D99A32]/10 text-[#252B28]'
-                : 'border-[#27845A]/30 bg-[#27845A]/10 text-[#27845A]'
+                ? "border-[#D99A32]/40 bg-[#D99A32]/10 text-[#252B28]"
+                : "border-[#27845A]/30 bg-[#27845A]/10 text-[#27845A]"
           }`}
         >
           {fa(available)} مانده
@@ -80,7 +88,9 @@ function ItemCard({ item }: { item: MenuItemAvailability }) {
 
       <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
         <div className="rounded-lg bg-[#F8F9F6] py-2">
-          <div className="font-semibold tabular-nums text-[#252B28]">{fa(configured)}</div>
+          <div className="font-semibold tabular-nums text-[#252B28]">
+            {fa(configured)}
+          </div>
           <div className="mt-0.5 text-[11px] text-[#737B75]">سهمیه</div>
         </div>
         <div className="rounded-lg bg-[#F8F9F6] py-2">
@@ -90,7 +100,9 @@ function ItemCard({ item }: { item: MenuItemAvailability }) {
           <div className="mt-0.5 text-[11px] text-[#737B75]">رزرو</div>
         </div>
         <div className="rounded-lg bg-[#F8F9F6] py-2">
-          <div className="font-semibold tabular-nums text-[#252B28]">{fa(available)}</div>
+          <div className="font-semibold tabular-nums text-[#252B28]">
+            {fa(available)}
+          </div>
           <div className="mt-0.5 text-[11px] text-[#737B75]">موجود</div>
         </div>
       </div>
@@ -101,11 +113,14 @@ function ItemCard({ item }: { item: MenuItemAvailability }) {
         aria-expanded={expanded}
         className="mt-3 w-full rounded-lg border border-[#E5E9E5] bg-white px-2 py-2 text-xs font-medium text-[#252B28] transition-colors duration-150 hover:border-[#234B3B] hover:text-[#234B3B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B]/40"
       >
-        {expanded ? 'انصراف' : 'تغییر تعداد'}
+        {expanded ? "انصراف" : "تغییر تعداد"}
       </button>
 
       {expanded && (
-        <form action={formAction} className="mt-3 space-y-3 border-t border-[#E5E9E5] pt-3">
+        <form
+          action={formAction}
+          className="mt-3 space-y-3 border-t border-[#E5E9E5] pt-3"
+        >
           <input type="hidden" name="menuItemId" value={item.menuItemId} />
 
           <label className="block text-xs font-medium text-[#252B28]">
@@ -145,7 +160,8 @@ function ItemCard({ item }: { item: MenuItemAvailability }) {
               role="status"
               className="rounded-lg border border-[#27845A]/30 bg-[#27845A]/10 px-3 py-2 text-[11px] leading-6 text-[#27845A]"
             >
-              به‌روزرسانی شد: {fa(state.availableQuantity)} موجود، {fa(state.configuredQuantity)} سهمیه.
+              به‌روزرسانی شد: {fa(state.availableQuantity)} موجود،{" "}
+              {fa(state.configuredQuantity)} سهمیه.
             </p>
           )}
 
@@ -154,7 +170,7 @@ function ItemCard({ item }: { item: MenuItemAvailability }) {
             disabled={pending}
             className="w-full rounded-lg bg-[#234B3B] px-2 py-2 text-xs font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-[#193A2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234B3B] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {pending ? 'در حال اعمال…' : 'اعمال تغییر'}
+            {pending ? "در حال اعمال…" : "اعمال تغییر"}
           </button>
         </form>
       )}

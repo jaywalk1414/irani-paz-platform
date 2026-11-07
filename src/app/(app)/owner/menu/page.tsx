@@ -1,12 +1,15 @@
-import { and, eq } from 'drizzle-orm';
-import { requireRole } from '@/lib/auth/require';
-import { db } from '@/lib/db/client';
-import { menuItems } from '@/lib/db/schema';
-import { getBusinessContext, listMenuWithAvailability } from '@/lib/services/availability.service';
-import { MenuTable, type MenuRow } from './MenuTable';
+import { and, eq } from "drizzle-orm";
+import { requireRole } from "@/lib/auth/require";
+import { db } from "@/lib/db/client";
+import { menuItems } from "@/lib/db/schema";
+import {
+  getBusinessContext,
+  listMenuWithAvailability,
+} from "@/lib/services/availability.service";
+import { MenuTable, type MenuRow } from "./MenuTable";
 
 export default async function OwnerMenuPage() {
-  const user = await requireRole(['owner']);
+  const user = await requireRole(["owner"]);
   const ctx = await getBusinessContext(user.restaurantId);
 
   const [items, availability] = await Promise.all([
@@ -26,7 +29,7 @@ export default async function OwnerMenuPage() {
       id: item.id,
       name: item.name,
       description: item.description,
-      ingredientsText: item.ingredients.join(', '),
+      ingredientsText: item.ingredients.join(", "),
       priceToman: item.priceToman,
       prepTimeMinutes: item.prepTimeMinutes,
       prepGroup: item.prepGroup,
@@ -42,9 +45,10 @@ export default async function OwnerMenuPage() {
       <div className="space-y-1">
         <h1 className="text-xl font-bold text-[#252B28]">منو</h1>
         <p className="text-sm leading-7 text-[#737B75]">
-          قیمت، زمان آماده‌سازی، مواد تشکیل‌دهنده و تعداد پیش‌فرض روزانه را ویرایش کنید.
-          موجودی مخصوص امروز در بخش{' '}
-          <span className="font-medium text-[#252B28]">موجودی</span> مدیریت می‌شود.
+          قیمت، زمان آماده‌سازی، مواد تشکیل‌دهنده و تعداد پیش‌فرض روزانه را
+          ویرایش کنید. موجودی مخصوص امروز در بخش{" "}
+          <span className="font-medium text-[#252B28]">موجودی</span> مدیریت
+          می‌شود.
         </p>
       </div>
       <MenuTable rows={rows} />
